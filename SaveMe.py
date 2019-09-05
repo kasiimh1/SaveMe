@@ -1,8 +1,8 @@
 import subprocess
 import os
 import sys
+import time
 
-import sys, os
 frozen = 'not'
 if getattr(sys, 'frozen', False):
     # we are running in a bundle
@@ -32,8 +32,7 @@ udid = ideviceidOuput
 
 print('Rebooting The Device Into Recovery Mode..\n')
 popen = subprocess.Popen('./ideviceenterrecovery %s' %udid, shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
-communicateRes = popen.communicate()
-enterRecOuput, stdErrValue = communicateRes
+time.sleep(20) #some devices reboot faster than others
 
 popen = subprocess.Popen('./igetnonce', stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
 communicateRes = popen.communicate()
@@ -69,12 +68,7 @@ iosversion = input()
 tsscheckerArgs = './tsschecker -d %s' %deviceid + ' -e %s' %ecid + ' --boardconfig %s' %boardid + ' --ios %s' %iosversion + ' --apnonce %s' %apnonce + ' -s --save-path ' + savePath
 
 popen = subprocess.Popen([tsscheckerArgs], shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
-communicateRes = popen.communicate()
-tsscheckerOutput, stdErrValue = communicateRes
-
 popen = subprocess.Popen('./irecovery -n', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
-communicateRes = popen.communicate()
-enterRecOuput, stdErrValue = communicateRes
 
 print('File saved at path ' + savePath)
 print('Exiting')
