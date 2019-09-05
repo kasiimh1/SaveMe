@@ -45,17 +45,23 @@ for s in igetNonceOuput:
         ecid = ecid.replace('ECID=','')
         ecid = ecid[:13]
 
-    if s.startswith('ApNonce='):
-        apnonce = s
-        apnonce = apnonce.replace('ApNonce=','')
-
     if s.startswith('Identified device as '):
         boardid = s
-        boardid = boardid.replace('Identified device as ','')
-        boardid = boardid.replace('in normal mode...','')
+        boardid = boardid.replace('Identified device as','')
+        boardid = boardid.replace('in recovery mode...','')
         deviceid = boardid[8:]
         boardid = boardid[:7]
         boardid = boardid.replace(',','')
+
+popen = subprocess.Popen('./irecovery -q', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
+communicateRes = popen.communicate()
+irecOuput, stdErrValue = communicateRes
+irecOuput = irecOuput.split('\n')
+
+for s in irecOuput:
+    if s.startswith('NONC:'):
+        apnonce = s
+        apnonce = apnonce.replace('NONC:','')
         
 print('Device Model = ' + deviceid)
 print('Device UDID = ' + udid)
