@@ -22,53 +22,56 @@ iosversion = 0
 savePath = '~/Desktop'
 
 os.chdir(bundle_dir)
-print('Connect Device To Start..\n')
+print('\n\n[*] Connect Device To Start..')
 os.chdir(os.getcwd() + '/SupportFiles/')
 
-popen = subprocess.Popen('./idevice_id -l', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
+popen = subprocess.Popen('./ideviceinfo | grep UniqueDeviceID: ', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
 communicateRes = popen.communicate()
-ideviceidOuput, stdErrValue = communicateRes
-udid = ideviceidOuput
+udid, stdErrValue = communicateRes
+udid = udid.strip()
+udid = udid[16:]
 
-print('Rebooting The Device Into Recovery Mode..\n')
+popen = subprocess.Popen('./ideviceinfo | grep UniqueChipID: ', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
+communicateRes = popen.communicate()
+ecid, stdErrValue = communicateRes
+ecid = ecid.strip()
+ecid = ecid[15:]
+
+popen = subprocess.Popen('./ideviceinfo | grep ProductType: ', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
+communicateRes = popen.communicate()
+deviceid, stdErrValue = communicateRes
+deviceid = deviceid.strip()
+deviceid = deviceid[13:]
+
+popen = subprocess.Popen('./ideviceinfo | grep HardwareModel: ', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
+communicateRes = popen.communicate()
+boardid, stdErrValue = communicateRes
+boardid = boardid.strip()
+boardid = boardid[15:]
+
 popen = subprocess.Popen('./ideviceenterrecovery %s' %udid, shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
-time.sleep(20) #some devices reboot faster than others
-
-popen = subprocess.Popen('./igetnonce', stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
 communicateRes = popen.communicate()
-igetNonceOuput, stdErrValue = communicateRes
-igetNonceOuput = igetNonceOuput.split('\n')
+enterRecovery, stdErrValue = communicateRes
+print('[*] ' + enterRecovery)
 
-for s in igetNonceOuput:
-    if s.startswith('ECID='):
-        ecid = s
-        ecid = ecid.replace('ECID=','')
-        ecid = ecid[:13]
-
-    if s.startswith('Identified device as '):
-        boardid = s
-        boardid = boardid.replace('Identified device as','')
-        boardid = boardid.replace('in recovery mode...','')
-        deviceid = boardid[8:]
-        boardid = boardid[:7]
-        boardid = boardid.replace(',','')
+time.sleep(20) #some devices reboot faster than others
 
 popen = subprocess.Popen('./irecovery -q', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
 communicateRes = popen.communicate()
-irecOuput, stdErrValue = communicateRes
-irecOuput = irecOuput.split('\n')
+apNonce, stdErrValue = communicateRes
+apNonce = apNonce.split('\n')
 
-for s in irecOuput:
+for s in apNonce:
     if s.startswith('NONC:'):
         apnonce = s
         apnonce = apnonce.replace('NONC:','')
         
-print('Device Model = ' + deviceid)
-print('Device UDID = ' + udid)
-print('BoardConfig = ' + boardid)
-print('ECID = ' + ecid)
-print('ApNonce = ' + apnonce)
-print('Enter the iOS version to save the ticket for')
+print('[D] Device Model = ' + deviceid)
+print('[D] Device UDID = ' + udid)
+print('[D] BoardConfig = ' + boardid)
+print('[D] ECID = ' + ecid)
+print('[D] ApNonce = ' + apnonce)
+print('[D] Enter the iOS version to save the ticket for')
 
 iosversion = input()
 
@@ -77,5 +80,5 @@ tsscheckerArgs = './tsschecker -d %s' %deviceid + ' -e %s' %ecid + ' --boardconf
 popen = subprocess.Popen([tsscheckerArgs], shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
 popen = subprocess.Popen('./irecovery -n', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
 
-print('File saved at path ' + savePath)
-print('Exiting')
+print('[*] File saved at path ' + savePath)
+print('[*] Exiting')
