@@ -1,7 +1,6 @@
 import subprocess
 import os
 import sys
-import time
 import argparse
 import re
 import glob

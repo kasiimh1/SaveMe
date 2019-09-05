@@ -1,5 +1,7 @@
 # SaveMe
- Grab Device ECID, ApNonce, BoardConfig and iPhoneID from device and grab signed SHSH via TSSChecker
+-------
+
+ Grab Device ECID, ApNonce, BoardConfig and iPhoneID from device and grab signed SHSH via TSSChecker.
  
  UPDATE - Removed igetnonce replaced with ideviceinfo, rewrote the args and use grep for grabbing the values and strip the return values to remove white spaces both leading and trailing.
 
@@ -7,9 +9,11 @@
  Fixed the boardconfig of the iPhone11,6 being cut off 
  Now grabs ApNonce from Recovery Mode. (ApNone set in NVRAM)
 
-Thanks To Tihmstar & S0uthwest and the creators of iRecovery & Libmobiledevice for
+Thanks To Tihmstar & S0uthwest and the creators of iRecovery & [Libmobiledevice](https://github.com/libimobiledevice) for:
 
-- tsschecker
-- ideviceinfo
-- irecovery
-- ideviceenterrecovery
+- idevice_id (from Libmobiledevice)
+- ideviceenterrecovery (from Libmobiledevice)
+- [igetnonce](https://github.com/tihmstar/igetnonce)
+- [irecovery](https://github.com/libimobiledevice/libirecovery)
+- [tsschecker](https://github.com/tihmstar/tsschecker)
+
