@@ -54,7 +54,8 @@ for s in igetNonceOuput:
         boardid = boardid.replace('Identified device as ','')
         boardid = boardid.replace('in normal mode...','')
         deviceid = boardid[8:]
-        boardid = boardid[:6]
+        boardid = boardid[:7]
+        boardid = boardid.replace(',','')
         
 print('Device Model = ' + deviceid)
 print('Device UDID = ' + udid)
