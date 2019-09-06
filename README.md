@@ -47,3 +47,8 @@ Uses the following tools
 - igetnonce https://github.com/s0uthwest/igetnonce
 - libimobiledevice - ideviceenterrecovery, ideviceinfo https://github.com/libimobiledevice
 - tsschecker https://github.com/s0uthwest/tsschecker
+
+Future Updates?
+- I could possibly compile this for Windows users if that's something you guys would like
+- img4tool - check if the saved ticket is valid 
+
