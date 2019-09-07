@@ -43,7 +43,7 @@ popen = subprocess.Popen('./ideviceinfo | grep UniqueChipID: ', shell = True, st
 communicateRes = popen.communicate()
 ecid, stdErrValue = communicateRes
 ecid = ecid.strip()
-ecid = ecid[15:]
+ecid = ecid[13:]
 
 popen = subprocess.Popen('./ideviceinfo | grep UniqueDeviceID: ', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
 communicateRes = popen.communicate()
