@@ -44,6 +44,7 @@ communicateRes = popen.communicate()
 ecid, stdErrValue = communicateRes
 ecid = ecid.strip()
 ecid = ecid[13:]
+ecid = ecid.replace(' ','')
 
 popen = subprocess.Popen('./ideviceinfo | grep UniqueDeviceID: ', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
 communicateRes = popen.communicate()
@@ -113,12 +114,14 @@ if (os.path.isdir(savePath + '/' + ecid) is False):
     os.mkdir(savePath + '/' + ecid)
 else:
     print('[*] Skipping creating ECID folder as %s it already exists' %ecid)
+
 savePath = savePath + '/' + ecid
 
 if (os.path.isdir(savePath + '/' + iosversion) is False):
    os.mkdir(savePath + '/' + iosversion)
 else:
     print('[*] Skipping creating iOS version folder as %s it already exists' %ecid)
+
 savePath = savePath + '/' + iosversion
 
 tsscheckerArgs = './tsschecker -d %s' %deviceid + ' -e %s' %ecid + ' --boardconfig %s' %boardid + ' --ios %s' %iosversion + ' --apnonce %s' %apnonce + ' -s --save-path %s' %savePath
