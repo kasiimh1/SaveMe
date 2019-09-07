@@ -1,4 +1,4 @@
-UPDATE v0.5 - SaveMe The Easiest SHSH saver for macOS
+UPDATE v0.6 - SaveMe The Easiest SHSH saver for macOS
 
 Requirements before using 
 - install brew
@@ -10,14 +10,15 @@ After installing brew run the following commands
 This should fix issues when not displaying device info
 
 New in this update
-1. Adds new folder structure when saving tickets (unique per device and firmware)
-2. Removed irecovery as it didn't work for some users on High Sierra 
-3. Switched back to igetnonce
-4. Detects Processor Type ie A12(X) or not 
-5. If non A12(X) device it checks the generated nonce against Chimera's and Unc0vers default generators
-6. Displays saved ticket path  
-7. Migrated to FutureRestore for exiting Recovery Mode as irecovery was removed as mentioned above
-8. Biggest feature last, now you're able to check saved Ticket against device's generator with FutureRestore
+1. Fixes wrong ECID and saving path
+2. Adds new folder structure when saving tickets (unique per device and firmware)
+3. Removed irecovery as it didn't work for some users on High Sierra 
+4. Switched back to igetnonce
+5. Detects Processor Type ie A12(X) or not 
+6. If non A12(X) device it checks the generated nonce against Chimera's and Unc0vers default generators
+7. Displays saved ticket path  
+8. Migrated to FutureRestore for exiting Recovery Mode as irecovery was removed as mentioned above
+9. Biggest feature last, now you're able to check saved Ticket against device's generator with FutureRestore
 
 How to use
 1. Download from this link
@@ -41,6 +42,7 @@ Shout out to the following people for helping with testing and contributions
 1. /u/tk_ios
 2. /u/frakman1
 3. /u/ForceBru
+4. u/maelxich
 
 Uses the following tools
 - FutureRestore https://github.com/s0uthwest/futurerestore
@@ -51,4 +53,3 @@ Uses the following tools
 Future Updates?
 - I could possibly compile this for Windows users if that's something you guys would like
 - img4tool - check if the saved ticket is valid 
-
