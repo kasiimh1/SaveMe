@@ -27,9 +27,10 @@ hashes = '27325c8258be46e69d9ee57fa9a8fbc28b873df434e5e702a8b27999551138ae','3a8
 savePath = os.getcwd()
 
 if (os.path.isdir(savePath + '/SaveMe') is False):
-    os.mkdir(savePath + '/SaveMe')
-else:
-    print('\n\n[*] Skipping creating SaveMe folder as it already exists')
+    try:
+        os.mkdir(savePath + '/SaveMe')
+    except FileExistsError:
+        print('\n\n[*] Skipping creating SaveMe folder as it already exists')
 
 savePath = savePath + '/SaveMe'
 
@@ -111,16 +112,18 @@ print('[D] ApNonce = ' + apnonce)
 iosversion = input('[D] Enter the iOS version to save the ticket for > ')
 
 if (os.path.isdir(savePath + '/' + ecid) is False):
-    os.mkdir(savePath + '/' + ecid)
-else:
-    print('[*] Skipping creating ECID folder as %s it already exists' %ecid)
+    try:
+        os.mkdir(savePath + '/' + ecid)
+    except FileExistsError:
+        print('[*] Skipping creating ECID folder as %s it already exists' %ecid)
 
 savePath = savePath + '/' + ecid
 
 if (os.path.isdir(savePath + '/' + iosversion) is False):
-   os.mkdir(savePath + '/' + iosversion)
-else:
-    print('[*] Skipping creating iOS version folder as %s it already exists' %ecid)
+    try:
+        os.mkdir(savePath + '/' + iosversion)
+    except FileExistsError:
+        print('[*] Skipping creating iOS version folder as %s it already exists' %ecid)
 
 savePath = savePath + '/' + iosversion
 
