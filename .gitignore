@@ -17,3 +17,9 @@ idevice_id
 ideviceenterrecovery
 ideviceinfo
 futurerestore
+*.dll
+windows/SupportFiles/igetnonce.exe
+windows/SupportFiles/ideviceinfo.exe
+windows/SupportFiles/ideviceenterrecovery.exe
+windows/SupportFiles/futurerestore.exe
+windows/SupportFiles/tsschecker.exe
