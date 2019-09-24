@@ -1,4 +1,4 @@
-UPDATE v0.7 - SaveMe The Easiest SHSH saver for macOS and now Windows!
+UPDATE v0.8 - SaveMe The Easiest SHSH saver for macOS and now Windows!
 
 Requirements before using for Windows
 - install iTunes
