@@ -13,16 +13,17 @@ After installing brew run the following commands
 This should fix issues when not displaying device info
 
 New in this update
-1. Added Windows Support!
-2. Fixes wrong ECID and saving path
-3. Adds new folder structure when saving tickets (unique per device and firmware)
-4. Removed irecovery as it didn't work for some users on High Sierra 
-5. Switched back to igetnonce
-6. Detects Processor Type ie A12(X) or not 
-7. If non A12(X) device it checks the generated nonce against Chimera's and Unc0vers default generators
-8. Displays saved ticket path  
-9. Migrated to FutureRestore for exiting Recovery Mode as irecovery was removed as mentioned above
-10. Biggest feature last, now you're able to check saved Ticket against device's generator with FutureRestore
+1. Recompiled against latest TssChecker for macOS.. Windows update coming!
+2. Added Windows Support!
+3. Fixes wrong ECID and saving path
+4. Adds new folder structure when saving tickets (unique per device and firmware)
+5. Removed irecovery as it didn't work for some users on High Sierra 
+6. Switched back to igetnonce
+7. Detects Processor Type ie A12(X) or not 
+8. If non A12(X) device it checks the generated nonce against Chimera's and Unc0vers default generators
+9. Displays saved ticket path  
+10. Migrated to FutureRestore for exiting Recovery Mode as irecovery was removed as mentioned above
+11. Biggest feature last, now you're able to check saved Ticket against device's generator with FutureRestore
 
 How to use for Windows
 1. Download from this link
