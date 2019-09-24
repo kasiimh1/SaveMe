@@ -68,6 +68,7 @@ Uses the following tools
 - libimobiledevice - ideviceenterrecovery, ideviceinfo https://github.com/libimobiledevice
 - libimobiledevice Windows - ideviceenterrecovery, ideviceinfo https://github.com/Devjam81/libimobile2019
 - tsschecker https://github.com/s0uthwest/tsschecker
+- tsschecker compiled with iOS 13.0 fixes https://github.com/kasiimh1/tsschecker
 
 Future Updates?
 - img4tool - check if the saved ticket is valid 
