@@ -23,3 +23,13 @@ windows/SupportFiles/ideviceinfo.exe
 windows/SupportFiles/ideviceenterrecovery.exe
 windows/SupportFiles/futurerestore.exe
 windows/SupportFiles/tsschecker.exe
+macOS/build/SaveMe/xref-SaveMe.html
+macOS/build/SaveMe/warn-SaveMe.txt
+macOS/build/SaveMe/PYZ-00.toc
+macOS/build/SaveMe/PYZ-00.pyz
+macOS/build/SaveMe/PKG-00.toc
+macOS/build/SaveMe/PKG-00.pkg
+macOS/build/SaveMe/EXE-00.toc
+macOS/build/SaveMe/base_library.zip
+macOS/build/SaveMe/Analysis-00.toc
+macOS/__pycache__/SaveMe.cpython-37.pyc

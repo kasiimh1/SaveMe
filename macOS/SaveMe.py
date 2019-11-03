@@ -40,6 +40,12 @@ print('[*] Connect Device To Start..')
 input('[*] Press ENTER when Device is connected > ')
 os.chdir(os.getcwd() + '/SupportFiles/')
 
+popen = subprocess.Popen('./ideviceinfo | grep UniqueDeviceID: ', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
+communicateRes = popen.communicate()
+udid, stdErrValue = communicateRes
+udid = udid.strip()
+udid = udid[16:]
+
 popen = subprocess.Popen('./ideviceinfo | grep UniqueChipID: ', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
 communicateRes = popen.communicate()
 ecid, stdErrValue = communicateRes
@@ -47,11 +53,8 @@ ecid = ecid.strip()
 ecid = ecid[13:]
 ecid = ecid.replace(' ','')
 
-popen = subprocess.Popen('./ideviceinfo | grep UniqueDeviceID: ', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
-communicateRes = popen.communicate()
-udid, stdErrValue = communicateRes
-udid = udid.strip()
-udid = udid[16:]
+
+#check if the device is already cached otherwise continue to fetch the remaining data....
 
 popen = subprocess.Popen('./ideviceinfo | grep HardwarePlatform: ', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
 communicateRes = popen.communicate()
