@@ -1,4 +1,4 @@
-UPDATE v0.8 - SaveMe The Easiest SHSH saver for macOS and now Windows!
+UPDATE v0.9 - SaveMe The Easiest SHSH saver for macOS and now Windows!
 
 Requirements before using for Windows
 - install iTunes
@@ -13,6 +13,12 @@ After installing brew run the following commands
 This should fix issues when not displaying device info
 
 New in this update
+- Remove FutureRestore SHSH verification 
+- Compiled against latest tsschecker
+- Compiled against latest upstream changes
+- Added irecovery to exit recovery mode, FutureRestore is currently broken
+
+Previous changes
 1. Recompiled against latest TssChecker for macOS.. Windows update coming!
 2. Added Windows Support!
 3. Fixes wrong ECID and saving path
@@ -52,7 +58,7 @@ How to use for macOS
 10. Enjoy your newly saved tickets for future use
 
 Screenshots
--  New Folder Structure
+- New Folder Structure
 - Ticket comparing to devices set generator
 - A12(X) device check
 - Non A12(X) device check
@@ -64,12 +70,11 @@ Shout out to the following people for helping with testing and contributions
 4. u/maelxich
 
 Uses the following tools
-- FutureRestore https://github.com/s0uthwest/futurerestore
 - igetnonce https://github.com/s0uthwest/igetnonce
-- libimobiledevice - ideviceenterrecovery, ideviceinfo https://github.com/libimobiledevice
+- libimobiledevice - ideviceenterrecovery, ideviceinfo, irecovery https://github.com/libimobiledevice
 - libimobiledevice Windows - ideviceenterrecovery, ideviceinfo https://github.com/Devjam81/libimobile2019
 - tsschecker https://github.com/s0uthwest/tsschecker
-- tsschecker compiled with iOS 13.0 fixes https://github.com/kasiimh1/tsschecker
 
 Future Updates?
 - img4tool - check if the saved ticket is valid 
+- fix SHSH verification? 

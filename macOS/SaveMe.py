@@ -26,16 +26,16 @@ hashes = '27325c8258be46e69d9ee57fa9a8fbc28b873df434e5e702a8b27999551138ae','3a8
 
 savePath = os.getcwd()
 
-if (os.path.isdir(savePath + '/SaveMe') is False):
+if (os.path.isdir(savePath + '/SaveMe-Tickets') is False):
     try:
-        os.mkdir(savePath + '/SaveMe')
+        os.mkdir(savePath + '/SaveMe-Tickets')
     except FileExistsError:
         print('\n\n[*] Skipping creating SaveMe folder as it already exists')
 
-savePath = savePath + '/SaveMe'
+savePath = savePath + '/SaveMe-Tickets'
 
 os.chdir(bundle_dir)
-
+print('\n\nSaveMe v0.9 by Kasiimh1')
 print('[*] Connect Device To Start..')
 input('[*] Press ENTER when Device is connected > ')
 os.chdir(os.getcwd() + '/SupportFiles/')
@@ -91,21 +91,19 @@ for s in igetNonceOuput:
         apnonce = s
         apnonce = apnonce.replace('ApNonce=','')
 
-if (platform.find('t8020') != -1 or platform.find('t8027') != -1):
-    print('[*] Detected A12(X) Device')
-
+if (platform.find('t8020') == 0 or platform.find('t8027') == 0 or platform.find('t8030') == 0):
+    print('[*] Detected A12/13(X) Device')
 else:
     for x in hashes:
         if (apnonce == x) is True:
-            print('[*] Detected Non A12(X) Device')
+            print('[*] Detected Non A12/13(X) Device')
             print('[*] Device ApNonce matches the default unc0ver or chimera generator')
             break;
-        
         else:
-            print('[*] Detected Non A12(X) Device')
+            print('[*] Detected Non A12/13(X) Device')
             print('[*] Device ApNonce does not match the unc0ver or chimera generator')
             break;
-
+    
 print('[D] Device Model = ' + deviceid)
 print('[D] Device UDID = ' + udid)
 print('[D] BoardConfig = ' + boardid)
@@ -133,22 +131,23 @@ savePath = savePath + '/' + iosversion
 tsscheckerArgs = './tsschecker -d %s' %deviceid + ' -e %s' %ecid + ' --boardconfig %s' %boardid + ' --ios %s' %iosversion + ' --apnonce %s' %apnonce + ' -s --save-path %s' %savePath
 popen = subprocess.Popen([tsscheckerArgs], shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
 
-print('[*] Checking ticket against device in Recovery Mode')
+# print('[*] Checking ticket against device in Recovery Mode')
 input('[*] Press Enter When File is Saved > ')
 
 ticket = ''
 for file in glob.glob(os.path.join(savePath, "*.shsh2")):
     ticket = file
 
-print('[*] Checking this ticket ' + ticket)
+# print('[*] Checking this ticket ' + ticket)
+# popen = subprocess.Popen('./irecovery -n', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
+# input('[*] Press ENTER when Device is Booted Up > ')
+# popen = subprocess.Popen('./futurerestore -w -t %s ' %ticket, shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
+# communicateRes = popen.communicate()
+# ticketCheck, stdErrValue = communicateRes
+# print('\n\n[*] %s' %ticketCheck)
 
-popen = subprocess.Popen('./futurerestore -w -t %s ' %ticket, shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
-communicateRes = popen.communicate()
-ticketCheck, stdErrValue = communicateRes
-print('\n\n[*] %s' %ticketCheck)
+popen = subprocess.Popen('./irecovery -n', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
 print('[*] Exiting Recovery Mode')
-
-popen = subprocess.Popen('./futurerestore --exit-recovery', shell = True, stdout=subprocess.PIPE,stderr=subprocess.PIPE, encoding='utf8')
 if (ticket != None) is True:
     print('[*] File Save as ' + ticket)
 else:

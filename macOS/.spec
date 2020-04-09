@@ -3,10 +3,10 @@
 block_cipher = None
 
 
-a = Analysis(['SaveMe.py'],
+a = Analysis(['irecovery:/SupportFiles', 'SaveMe.py'],
              pathex=['/Users/kasiim/Documents/GitHub/SaveMe/macOS'],
              binaries=[],
-             datas=[('tsschecker', '/SupportFiles/'), ('ideviceinfo', '/SupportFiles/'), ('ideviceenterrecovery', '/SupportFiles/'), ('igetnonce', '/SupportFiles/'), ('futurerestore', '/SupportFiles/'), ('irecovery', '/SupportFiles/')],
+             datas=[('tsschecker', '/SupportFiles/'), ('ideviceinfo', '/SupportFiles/'), ('ideviceenterrecovery', '/SupportFiles/'), ('igetnonce', '/SupportFiles/'), ('futurerestore', '/SupportFiles/')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -23,7 +23,7 @@ exe = EXE(pyz,
           a.zipfiles,
           a.datas,
           [],
-          name='SaveMe',
+          name='',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
