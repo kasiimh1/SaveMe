@@ -109,7 +109,7 @@ while exit != True:
         print('[*] No Nonce Extraction Method Was Set!')
         print('[*] Defaulting to Recovery Mode Nonce Extraction (Rebooting Device)')
         input('[*] Press ENTER when Device is connected > ')
-        #os.chdir(os.getcwd() + '/SupportFiles/')
+        os.chdir(os.getcwd() + '/SupportFiles/')
         udid = deviceExtractionTool('ideviceinfo', 16, 'UniqueDeviceID: ', False)
         ecid = deviceExtractionTool('ideviceinfo', 13, 'UniqueChipID: ', True)
         platform = deviceExtractionTool('ideviceinfo', 18, 'HardwarePlatform: ', False)
