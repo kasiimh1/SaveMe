@@ -17,6 +17,8 @@ def installDependencies():
     os.system('/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"')
     print('[I] Installing usbmuxd')
     os.system('brew install --HEAD usbmuxd')
+    print('[I] Installing liblist')
+    os.system('brew install --HEAD libplist')
     print('[I] Installing libimobiledevice')
     os.system('brew install --HEAD libimobiledevice')
     print('[I] Installing ideviceinstaller')
@@ -69,43 +71,51 @@ def dataReturn(output, error):
     return ret
 
 def printCachedDevices():
-    with open ('SaveMe-Devices') as json_file:
+    file = os.path.expanduser(args.s + 'SaveMe-Devices')
+    with open (file, 'r') as json_file:   
         data = json.load(json_file)
+
     if data != None:
-        print("\n[*] Found Cached Devices")
-    
-    for i in data['devices']:
+        for i in data['devices']:
+            print("------------------------------------------------------------------------")
+            print("-- Found Device --")
+            print("[D] Name: " + i['name'])
+            print("[D] UDID: " + i['udid'])
+            print("[D] ECID: " + i['ecid'])
+            print("[D] BoardID: " + i['boardid'])
+            print("[D] Platform: " + i['platform'])
+            print("[D] Generator: " + i['generator'])
+            print("[D] APNonce: " + i['apnonce'])
         print("------------------------------------------------------------------------")
-        print("-- Found Device --")
-        print("[D] Name: " + i['name'])
-        print("[D] UDID: " + i['udid'])
-        print("[D] ECID: " + i['ecid'])
-        print("[D] BoardID: " + i['boardid'])
-        print("[D] Platform: " + i['platform'])
-        print("[D] Generator: " + i['generator'])
-        print("[D] APNonce: " + i['apnonce'])
-    print("------------------------------------------------------------------------")
-    return
 
 def signedVersionChecker(model):
     signedReq = requests.get("https://api.ipsw.me/v4/device/" + model + "?type=ipsw")
     print("-- Checking Currently Signed iOS Versions --")
     print("[A] IPSW.me API Response Code: ["+ str(signedReq.status_code) + "]")
-    print("-- Server Response --")
+    ret = 0
+    if signedReq.status_code == 200:
+        print("-- Server Response --")
+        api = json.loads(signedReq.text)
+        apiLength = len(api['firmwares'])
+        for i in range(apiLength):
+            if args.c == True and api['firmwares'][i]['signed'] == True:
+                print("[V] iOS", api['firmwares'][i]['version'], "is currently being signed for the:", api['identifier'])
 
-    api = json.loads(signedReq.text)
-    apiLength = len(api['firmwares'])
-    for i in range(apiLength):
-        if api['firmwares'][i]['signed']:
-            print("[V] iOS", api['firmwares'][i]['version'], "is currently being signed for the:", api['identifier'])
-        if api['firmwares'][i]['version'] == args.v:
-            return True     
+            if api['firmwares'][i]['version'] == args.v and api['firmwares'][i]['signed'] == True:
+                print("[V] iOS", api['firmwares'][i]['version'], "is currently being signed for the:", api['identifier'])
+                ret = 1
+                break
+            if api['firmwares'][i]['version'] == args.v and api['firmwares'][i]['signed'] != True:
+                print("[V] iOS", api['firmwares'][i]['version'], "is currently NOT being signed for the:", api['identifier'])
+                ret = -1
+                break
+    return ret
 
-def writeDevicesToOutput(data):
+def writeDevicesToOutput(data, path):
     #serializing object
     json_object = json.dumps(data, indent = 4) 
-    f = open("SaveMe-Devices", "a")
-    f.write(json_object)
+    f = open(path + "/SaveMe-Devices", "a")
+    f.write(json_object+',')
     f.close()
 
 defaultHashes = '27325c8258be46e69d9ee57fa9a8fbc28b873df434e5e702a8b27999551138ae','3a88b7c3802f2f0510abc432104a15ebd8bd7154',
@@ -113,8 +123,8 @@ defaultHashes = '27325c8258be46e69d9ee57fa9a8fbc28b873df434e5e702a8b27999551138a
 
 parser = argparse.ArgumentParser(description='SaveMe: SHSH saver for macOS')
 parser.add_argument('-a', help='Add Device To Cache List', action='store_true')
-parser.add_argument('-b', help='Check Currently Signed iOS Versions', action='store_true')
-parser.add_argument('-c', help='Print Cached Devices', action='store_true')
+parser.add_argument('-c', help='Check Currently Signed iOS Versions', action='store_true')
+parser.add_argument('-p', help='Print Cached Devices', action='store_true')
 parser.add_argument('-d', help='Fetch Information From Device', action='store_true')
 parser.add_argument('-i', help='Install SaveMe Dependencies', action='store_true')
 parser.add_argument('-g', help='Use Custom SHSH2 Generator', action='store_true')
@@ -129,8 +139,13 @@ print('\nSaveMe v1.0 by Kasiimh1')
 if args.i != False:
     installDependencies()
 
+if args.p == True:
+        printCachedDevices()
+        sys.exit(-1)
+
 if args.c == True:
-    printCachedDevices()
+    signedVersionChecker("iPhone11,2")
+    sys.exit(-1)
 
 while exit != True and args.d != False:
     args.output = os.path.expanduser(args.s)
@@ -154,7 +169,7 @@ while exit != True and args.d != False:
         print('[*] No Nonce Extraction Method Was Set!')
         print('[*] Defaulting to Recovery Mode Nonce Extraction (Rebooting Device)')
         input('[*] Press ENTER when Device is connected > ')
-        os.chdir(os.getcwd() + '/SupportFiles/')
+        #os.chdir(os.getcwd() + '/SupportFiles/')
         udid = deviceExtractionTool('ideviceinfo', 16, 'UniqueDeviceID: ', False)
         ecid = deviceExtractionTool('ideviceinfo', 13, 'UniqueChipID: ', True)
         platform = deviceExtractionTool('ideviceinfo', 18, 'HardwarePlatform: ', False)
@@ -162,9 +177,11 @@ while exit != True and args.d != False:
         user = deviceExtractionTool('ideviceinfo', 12, 'DeviceName: ', False)
         boardid = deviceExtractionTool('ideviceinfo', 15, 'HardwareModel: ', False)
 
-        check = signedVersionChecker(product)
+        response = signedVersionChecker(product)
 
-        if udid != None and check == True:
+        print(response)
+
+        if udid != None and response == 1:
             print('[D] Found ' + user)
             print('[D] Device is:', product)
             print('[D] BoardID is:', boardid)
@@ -178,22 +195,24 @@ while exit != True and args.d != False:
             print('[*] Found APNonce in Recovery Mode:', APNonce)
 
             if args.a == True:
-                print("User Set Add Device To Cache List arg")                
+                print("-- User Set Add Device To Cache List arg --")                
                 if args.g != True:
                     generator = "0x1111111111111111"
                 else:
                     generator = args.v
                 data = {
-                    "name": user,
-                    "boardid": boardid,
-                    "model" : product,
-                    "generator": generator,
-                    "ecid": ecid,
-                    "udid": udid,
-                    "platform": platform,
-                    "apnonce": APNonce
+                    "device" : [ {
+                        "name": user,
+                        "boardid": boardid,
+                        "model" : product,
+                        "generator": generator,
+                        "ecid": ecid,
+                        "udid": udid,
+                        "platform": platform,
+                        "apnonce": APNonce
+                        }]
                 }
-                writeDevicesToOutput(data)
+                writeDevicesToOutput(data, savePath)
 
             if (platform.find('t8020') == 0 or platform.find('t8027') == 0 or platform.find('t8030') == 0):
                 print('[*] Detected A12/13(X) Device')
@@ -231,6 +250,7 @@ while exit != True and args.d != False:
             if input("Use SaveMe again? (y/n)? ").lower().strip() == 'y':
                 exit = False
                 args.v = None
+                check = False
             else:
                 exit = True
                 print('[*] Thanks for using SaveMe v1.0, Exiting Program')
