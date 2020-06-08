@@ -1,4 +1,4 @@
-import sys, os, argparse, subprocess
+import sys, os, argparse, subprocess, json, requests
 
 frozen = 'not'
 if getattr(sys, 'frozen', False):
@@ -68,18 +68,59 @@ def dataReturn(output, error):
         ret = output       
     return ret
 
+def printCachedDevices():
+    with open ('SaveMe-Devices') as json_file:
+        data = json.load(json_file)
+    if data != None:
+        print("\n[*] Found Cached Devices")
+    
+    for i in data['devices']:
+        print("------------------------------------------------------------------------")
+        print("-- Found Device --")
+        print("[D] Name: " + i['name'])
+        print("[D] UDID: " + i['udid'])
+        print("[D] ECID: " + i['ecid'])
+        print("[D] BoardID: " + i['boardid'])
+        print("[D] Platform: " + i['platform'])
+        print("[D] Generator: " + i['generator'])
+        print("[D] APNonce: " + i['apnonce'])
+    print("------------------------------------------------------------------------")
+    return
+
+def signedVersionChecker(model):
+    signedReq = requests.get("https://api.ipsw.me/v4/device/" + model + "?type=ipsw")
+    print("-- Checking Currently Signed iOS Versions --")
+    print("[A] IPSW.me API Response Code: ["+ str(signedReq.status_code) + "]")
+    print("-- Server Response --")
+
+    api = json.loads(signedReq.text)
+    apiLength = len(api['firmwares'])
+    for i in range(apiLength):
+        if api['firmwares'][i]['signed']:
+            print("[V] iOS", api['firmwares'][i]['version'], "is currently being signed for the:", api['identifier'])
+        if api['firmwares'][i]['version'] == args.v:
+            return True     
+
+def writeDevicesToOutput(data):
+    #serializing object
+    json_object = json.dumps(data, indent = 4) 
+    f = open("SaveMe-Devices", "a")
+    f.write(json_object)
+    f.close()
+
 defaultHashes = '27325c8258be46e69d9ee57fa9a8fbc28b873df434e5e702a8b27999551138ae','3a88b7c3802f2f0510abc432104a15ebd8bd7154',
 '15400076bc4c35a7c8caefdcae5bda69c140a11bce870548f0862aac28c194cc','603be133ff0bdfa0f83f21e74191cf6770ea43bb'
 
 parser = argparse.ArgumentParser(description='SaveMe: SHSH saver for macOS')
-#parser.add_argument('-a', help='Add New Devices To Cache List')
-#parser.add_argument('-c', help='Print Cached Devices')
-#parser.add_argument('-d', help='Enable Debug Output Logs', action='store_true')
+parser.add_argument('-a', help='Add Device To Cache List', action='store_true')
+parser.add_argument('-b', help='Check Currently Signed iOS Versions', action='store_true')
+parser.add_argument('-c', help='Print Cached Devices', action='store_true')
+parser.add_argument('-d', help='Fetch Information From Device', action='store_true')
 parser.add_argument('-i', help='Install SaveMe Dependencies', action='store_true')
-parser.add_argument('-g', help='Use Custom SHSH2 Generator')
+parser.add_argument('-g', help='Use Custom SHSH2 Generator', action='store_true')
 parser.add_argument('-n', help='Use Custom SHSH2 Nonce')
-parser.add_argument('-u', help='Grab nonce from Userland')
-parser.add_argument('-r', help='Grab nonce from Recovery Mode')
+parser.add_argument('-u', help='Grab Nonce From Userland')
+parser.add_argument('-r', help='Grab Nonce From Recovery Mode')
 parser.add_argument('-s', help='Set Custom SHSH2 Save Path', default='~/Desktop/')
 parser.add_argument('-v', help='Set iOS Version For Saving Tickets ')
 
@@ -87,7 +128,11 @@ args = parser.parse_args()
 print('\nSaveMe v1.0 by Kasiimh1')
 if args.i != False:
     installDependencies()
-while exit != True:
+
+if args.c == True:
+    printCachedDevices()
+
+while exit != True and args.d != False:
     args.output = os.path.expanduser(args.s)
     savePath = args.output
 
@@ -117,7 +162,9 @@ while exit != True:
         user = deviceExtractionTool('ideviceinfo', 12, 'DeviceName: ', False)
         boardid = deviceExtractionTool('ideviceinfo', 15, 'HardwareModel: ', False)
 
-        if udid != None:
+        check = signedVersionChecker(product)
+
+        if udid != None and check == True:
             print('[D] Found ' + user)
             print('[D] Device is:', product)
             print('[D] BoardID is:', boardid)
@@ -129,6 +176,24 @@ while exit != True:
             input('[*] Press ENTER when Device is in Recovery Mode > ')
             APNonce = deviceExtractApNonce()
             print('[*] Found APNonce in Recovery Mode:', APNonce)
+
+            if args.a == True:
+                print("User Set Add Device To Cache List arg")                
+                if args.g != True:
+                    generator = "0x1111111111111111"
+                else:
+                    generator = args.v
+                data = {
+                    "name": user,
+                    "boardid": boardid,
+                    "model" : product,
+                    "generator": generator,
+                    "ecid": ecid,
+                    "udid": udid,
+                    "platform": platform,
+                    "apnonce": APNonce
+                }
+                writeDevicesToOutput(data)
 
             if (platform.find('t8020') == 0 or platform.find('t8027') == 0 or platform.find('t8030') == 0):
                 print('[*] Detected A12/13(X) Device')
