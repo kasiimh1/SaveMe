@@ -199,39 +199,41 @@ while exit != True:
         else:
             print('[*] iOS Version Saving SHSH2 Ticket For', args.v)
 
-        print('-- Fetching APNonce From Recovery Mode --')
-        input('[*] Press Enter To Enter Recovery Mode ')
-        deviceEnterRecMode(udid)
-        input('[*] Press ENTER when Device is in Recovery Mode > ')
-        APNonce = deviceExtractApNonce()
-        print('[*] Found APNonce in Recovery Mode:', APNonce)
-        print('[*] Exiting Recovery Mode')
-        os.system('./irecovery -n')
 
-        if (os.path.isdir(savePath + '/' + ecid) is False):
-            try:
-                os.mkdir(savePath + '/' + ecid)
-            except FileExistsError:
-                    print('[*] Skipping creating ECID folder as %s it already exists' %ecid)
-        savePath = savePath + '/' + ecid
+        if (signedVersionChecker(product)) == 1:
+            print('-- Fetching APNonce From Recovery Mode --')
+            input('[*] Press Enter To Enter Recovery Mode ')
+            deviceEnterRecMode(udid)
+            input('[*] Press ENTER when Device is in Recovery Mode > ')
+            APNonce = deviceExtractApNonce()
+            print('[*] Found APNonce in Recovery Mode:', APNonce)
+            print('[*] Exiting Recovery Mode')
+            os.system('./irecovery -n')
 
-        if (os.path.isdir(savePath + '/' + args.v) is False):
-            try:
-                os.mkdir(savePath + '/' + args.v)
-            except FileExistsError:
-                print('[*] Skipping creating iOS version folder as %s it already exists' %ecid)
-        savePath = savePath + '/' + args.v
+            if (os.path.isdir(savePath + '/' + ecid) is False):
+                try:
+                    os.mkdir(savePath + '/' + ecid)
+                except FileExistsError:
+                        print('[*] Skipping creating ECID folder as %s it already exists' %ecid)
+            savePath = savePath + '/' + ecid
 
-        requestDeviceTicket(product, ecid, boardid, args.v, APNonce, savePath)
-        print('[*] File should be in:', savePath)
-        command = 'open ' + savePath
-        os.system(command)
+            if (os.path.isdir(savePath + '/' + args.v) is False):
+                try:
+                    os.mkdir(savePath + '/' + args.v)
+                except FileExistsError:
+                    print('[*] Skipping creating iOS version folder as %s it already exists' %ecid)
+            savePath = savePath + '/' + args.v
 
-    if input("Use SaveMe again? (y/n)? ").lower().strip() == 'y':
-        exit = False
-        args.v = None
-        check = False
-    else:
-        exit = True
-        print('[*] Thanks for using SaveMe v1.0, Exiting Program')
-        sys.exit(-1)                
+            requestDeviceTicket(product, ecid, boardid, args.v, APNonce, savePath)
+            print('[*] File should be in:', savePath)
+            command = 'open ' + savePath
+            os.system(command)
+
+        if input("Use SaveMe again? (y/n)? ").lower().strip() == 'y':
+            exit = False
+            args.v = None
+            check = False
+        else:
+            exit = True
+            print('[*] Thanks for using SaveMe v1.0, Exiting Program')
+            sys.exit(-1)                
