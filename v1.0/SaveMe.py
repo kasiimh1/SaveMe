@@ -157,7 +157,7 @@ def writeDevicesToOutput(data, path):
 defaultHashes = '27325c8258be46e69d9ee57fa9a8fbc28b873df434e5e702a8b27999551138ae','3a88b7c3802f2f0510abc432104a15ebd8bd7154',
 '15400076bc4c35a7c8caefdcae5bda69c140a11bce870548f0862aac28c194cc','603be133ff0bdfa0f83f21e74191cf6770ea43bb'
 
-parser = argparse.ArgumentParser(description='SaveMe: SHSH saver for macOS')
+parser = argparse.ArgumentParser(description='SaveMe: SHSH saver for macOS by Kasiimh1')
 parser.add_argument('-a', help='Add Device To Cache List (-d needed)', action='store_true') #broken
 parser.add_argument('-c', help='Check Currently Signed iOS Versions', action='store_true') 
 parser.add_argument('-d', help='Fetch Information From Device', action='store_true')
