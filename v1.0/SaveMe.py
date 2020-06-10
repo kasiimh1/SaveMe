@@ -88,6 +88,42 @@ def printCachedDevices():
             print("[D] APNonce: " + i['apnonce'])
         print("------------------------------------------------------------------------")
 
+def createSavePath(ecid, version):
+    path = args.s + 'SaveMe-Tickets/' + ecid + '/'
+    file = os.path.expanduser(path)
+
+    if os.path.isdir(file) is False:
+        try:
+            os.mkdir(file)
+        except FileExistsError:
+                print('[*] Skipping creating ECID folder as %s it already exists' %ecid)
+
+    if os.path.isdir(file + version) is False:
+        try:
+            os.mkdir(file + version)
+        except FileExistsError:
+            print('[*] Skipping creating iOS version folder as %s it already exists' %ecid)
+
+def saveTicketsForCachedDevices(version):
+    file = os.path.expanduser(args.s + 'SaveMe-Tickets/SaveMe-Devices')
+    with open(file, mode='r') as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+        for i in csv_reader:
+            print("------------------------------------------------------------------------")
+            print("-- Found Device --")
+            print("[D] Name: " + i['name'])
+            print("[D] Model: " + i['model'])
+            print("[D] UDID: " + i['udid'])
+            print("[D] ECID: " + i['ecid'])
+            print("[D] BoardID: " + i['boardid'])
+            print("[D] Platform: " + i['platform'])
+            print("[D] Generator: " + i['generator'])
+            print("[D] APNonce: " + i['apnonce'])
+            print("-- Saving Ticket For Cached Device -- ")
+            createSavePath(i['ecid'], version)
+            requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/')
+        print("------------------------------------------------------------------------")
+
 def signedVersionChecker(model):
     signedReq = requests.get("https://api.ipsw.me/v4/device/" + model + "?type=ipsw")
     print("-- Checking Currently Signed iOS Versions --")
@@ -100,6 +136,8 @@ def signedVersionChecker(model):
         for i in range(apiLength):
             if args.c == True and api['firmwares'][i]['signed'] == True:
                 print("[V] iOS", api['firmwares'][i]['version'], "is currently being signed for the:", api['identifier'])
+                if args.f == True:
+                    saveTicketsForCachedDevices(api['firmwares'][i]['version'])
 
             if api['firmwares'][i]['version'] == args.v and api['firmwares'][i]['signed'] == True:
                 print("[V] iOS", api['firmwares'][i]['version'], "is currently being signed for the:", api['identifier'])
@@ -120,120 +158,101 @@ defaultHashes = '27325c8258be46e69d9ee57fa9a8fbc28b873df434e5e702a8b27999551138a
 '15400076bc4c35a7c8caefdcae5bda69c140a11bce870548f0862aac28c194cc','603be133ff0bdfa0f83f21e74191cf6770ea43bb'
 
 parser = argparse.ArgumentParser(description='SaveMe: SHSH saver for macOS')
-parser.add_argument('-a', help='Add Device To Cache List (-d needed)', action='store_true')
-parser.add_argument('-c', help='Check Currently Signed iOS Versions', action='store_true') #works
-parser.add_argument('-d', help='Fetch Information From Device', action='store_true') # works
-parser.add_argument('-i', help='Install SaveMe Dependencies', action='store_true') # works
-parser.add_argument('-g', help='Specifiy Custom Generator') #works
-parser.add_argument('-p', help='Print Cached Devices', action='store_true') # works
-parser.add_argument('-s', help='Set Custom SHSH2 Save Path', default='~/Desktop/') #works
-parser.add_argument('-t', help='Save SHSH2 Ticket', action='store_true') #works
-parser.add_argument('-v', help='Set iOS Version For Saving Tickets') #works
+parser.add_argument('-a', help='Add Device To Cache List (-d needed)', action='store_true') #broken
+parser.add_argument('-c', help='Check Currently Signed iOS Versions', action='store_true') 
+parser.add_argument('-d', help='Fetch Information From Device', action='store_true')
+parser.add_argument('-f', help='Save SHSH2 Tickets For Cached Devices (-c needed)', action='store_true') 
+parser.add_argument('-g', help='Specifiy Custom Generator')
+parser.add_argument('-i', help='Install SaveMe Dependencies', action='store_true')
+parser.add_argument('-p', help='Print Cached Devices', action='store_true')
+parser.add_argument('-s', help='Set Custom SHSH2 Save Path', default='~/Desktop/')
+parser.add_argument('-t', help='Save SHSH2 Ticket', action='store_true')
+parser.add_argument('-v', help='Set iOS Version For Saving Tickets')
 
 args = parser.parse_args()
-while exit != True:
-    print('\nSaveMe v1.0 by Kasiimh1')
+print('\nSaveMe v1.0 by Kasiimh1')
 
-    if args.i != False:
-        installDependencies()
+if args.i != False:
+    installDependencies()
 
-    if args.p == True:
-            printCachedDevices()
-            sys.exit(-1)
-
-    if args.c == True:
-        signedVersionChecker("iPhone11,2")
+if args.p == True:
+        printCachedDevices()
         sys.exit(-1)
 
-    args.output = os.path.expanduser(args.s)
-    savePath = args.output
+if args.c == True:
+    signedVersionChecker("iPhone11,2")
+    sys.exit(-1)
 
-    if (os.path.isdir(savePath + 'SaveMe-Tickets') is False):
-        try:
-            os.mkdir(savePath + 'SaveMe-Tickets')
-        except FileExistsError:
-            print('\n\n[*] Skipping creating SaveMe folder as it already exists')
+args.output = os.path.expanduser(args.s)
+savePath = args.output
 
-    savePath = savePath + 'SaveMe-Tickets'
-    os.chdir(bundle_dir)
-    input('[*] Press ENTER when Device is connected > ')
-    #os.chdir(os.getcwd() + '/SupportFiles/')
-    udid = deviceExtractionTool('ideviceinfo', 16, 'UniqueDeviceID: ', False)
-    ecid = deviceExtractionTool('ideviceinfo', 13, 'UniqueChipID: ', True)
-    platform = deviceExtractionTool('ideviceinfo', 18, 'HardwarePlatform: ', False)
-    product = deviceExtractionTool('ideviceinfo', 13, 'ProductType: ', False)
-    user = deviceExtractionTool('ideviceinfo', 12, 'DeviceName: ', False)
-    boardid = deviceExtractionTool('ideviceinfo', 15, 'HardwareModel: ', False)
-    APNonce = None
-    generator = "0x1111111111111111"
+if (os.path.isdir(savePath + 'SaveMe-Tickets') is False):
+    try:
+        os.mkdir(savePath + 'SaveMe-Tickets')
+    except FileExistsError:
+        print('\n\n[*] Skipping creating SaveMe folder as it already exists')
 
-    if udid != None and args.d == True:
-        print("[*] Fetching Infromation From Device")                
-        print("-- Device Information --")                
-        print('[D] Found ' + user)
-        print('[D] Device is:', product)
-        print('[D] BoardID is:', boardid)
-        print('[D] Found Device: UDID:', udid)
-        print('[D] ECID:', ecid)
-        print('[D] Device Platform:', platform)
+savePath = savePath + 'SaveMe-Tickets'
+os.chdir(bundle_dir)
+input('[*] Press ENTER when Device is connected > ')
+#os.chdir(os.getcwd() + '/SupportFiles/')
+udid = deviceExtractionTool('ideviceinfo', 16, 'UniqueDeviceID: ', False)
+ecid = deviceExtractionTool('ideviceinfo', 13, 'UniqueChipID: ', True)
+platform = deviceExtractionTool('ideviceinfo', 18, 'HardwarePlatform: ', False)
+product = deviceExtractionTool('ideviceinfo', 13, 'ProductType: ', False)
+user = deviceExtractionTool('ideviceinfo', 12, 'DeviceName: ', False)
+boardid = deviceExtractionTool('ideviceinfo', 15, 'HardwareModel: ', False)
+APNonce = None
+generator = None
 
-    if args.a == True:
-        print("-- Adding Device To Cached List --")                
-        if args.g == None:
-            print("[*] Using Unc0ver's Generator!")
-            generator = "0x1111111111111111"
-        else:
-            print("[*] User Using Custom Generator!")
-            generator = args.g
+if udid != None and args.d == True:
+    print("[*] Fetching Infromation From Device")                
+    print("-- Device Information --")                
+    print('[D] Found ' + user)
+    print('[D] Device is:', product)
+    print('[D] BoardID is:', boardid)
+    print('[D] Found Device: UDID:', udid)
+    print('[D] ECID:', ecid)
+    print('[D] Device Platform:', platform)
 
-        data = '\n"' + user + '","' + boardid + '","' + product + '","' + generator + '","' + ecid + '","' + udid + '","' + platform + '","' + APNonce + '"'
+if args.a == True:
+    print("-- Adding Device To Cached List --")                
+    if args.g == None:
+        print("[*] Using Unc0ver's Generator!")
+        generator = "0x1111111111111111"
+    else:
+        print("[*] User Using Custom Generator!")
+        generator = args.g
 
-        writeDevicesToOutput(data, savePath)
+    data = '\n"' + user + '","' + boardid + '","' + product + '","' + generator + '","' + ecid + '","' + udid + '","' + platform + '","' + APNonce + '"'
+
+    writeDevicesToOutput(data, savePath)
+    print('[*] Thanks for using SaveMe v1.0, Exiting Program')
+    sys.exit(-1)
+
+if args.t == True:
+    print("-- Saving SHSH2 Ticket --")    
+    if args.v == None:
+        args.v = input('[*] Enter iOS Version To Save Ticket For: ')
+    else:
+        print('[*] iOS Version Saving SHSH2 Ticket For', args.v)
+
+
+    if (signedVersionChecker(product)) == 1:
+        print('-- Fetching APNonce From Recovery Mode --')
+        deviceEnterRecMode(udid)
+        input('[*] Press ENTER when Device is in Recovery Mode > ')
+        APNonce = deviceExtractApNonce()
+        print('[*] Found APNonce in Recovery Mode:', APNonce)
+        print('[*] Exiting Recovery Mode')
+        os.system('./irecovery -n')
+
+        createSavePath(ecid, args.v)
+        savePath = savePath + '/' + ecid + '/' + args.v + '/'
+        requestDeviceTicket(product, ecid, boardid, args.v, APNonce, savePath)
+        print('[*] File should be in:', savePath)
+        command = 'open ' + savePath
+        os.system(command)
+        
         print('[*] Thanks for using SaveMe v1.0, Exiting Program')
-        sys.exit(-1)
-
-    if args.t == True:
-        print("-- Saving SHSH2 Ticket --")    
-        if args.v == None:
-            args.v = input('[*] Enter iOS Version To Save Ticket For: ')
-        else:
-            print('[*] iOS Version Saving SHSH2 Ticket For', args.v)
-
-
-        if (signedVersionChecker(product)) == 1:
-            print('-- Fetching APNonce From Recovery Mode --')
-            input('[*] Press Enter To Enter Recovery Mode ')
-            deviceEnterRecMode(udid)
-            input('[*] Press ENTER when Device is in Recovery Mode > ')
-            APNonce = deviceExtractApNonce()
-            print('[*] Found APNonce in Recovery Mode:', APNonce)
-            print('[*] Exiting Recovery Mode')
-            os.system('./irecovery -n')
-
-            if (os.path.isdir(savePath + '/' + ecid) is False):
-                try:
-                    os.mkdir(savePath + '/' + ecid)
-                except FileExistsError:
-                        print('[*] Skipping creating ECID folder as %s it already exists' %ecid)
-            savePath = savePath + '/' + ecid
-
-            if (os.path.isdir(savePath + '/' + args.v) is False):
-                try:
-                    os.mkdir(savePath + '/' + args.v)
-                except FileExistsError:
-                    print('[*] Skipping creating iOS version folder as %s it already exists' %ecid)
-            savePath = savePath + '/' + args.v
-
-            requestDeviceTicket(product, ecid, boardid, args.v, APNonce, savePath)
-            print('[*] File should be in:', savePath)
-            command = 'open ' + savePath
-            os.system(command)
-
-        if input("Use SaveMe again? (y/n)? ").lower().strip() == 'y':
-            exit = False
-            args.v = None
-            check = False
-        else:
-            exit = True
-            print('[*] Thanks for using SaveMe v1.0, Exiting Program')
-            sys.exit(-1)                
+        sys.exit(-1)  
