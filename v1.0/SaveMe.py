@@ -192,11 +192,14 @@ while exit != True:
         print('[*] Thanks for using SaveMe v1.0, Exiting Program')
         sys.exit(-1)
 
-    if args.v == None and args.t == True:
-        args.v = input('[*] Enter iOS Version To Save Ticket For: ')
-        print('[*] iOS Version Saving SHSH2 Ticket For', args.v)
+    if args.t == True:
+        print("-- Saving SHSH2 Ticket --")    
+        if args.v == None:
+            args.v = input('[*] Enter iOS Version To Save Ticket For: ')
+        else:
+            print('[*] iOS Version Saving SHSH2 Ticket For', args.v)
 
-        print('-- Fetching APNonce From Recovery Mode')
+        print('-- Fetching APNonce From Recovery Mode --')
         input('[*] Press Enter To Enter Recovery Mode ')
         deviceEnterRecMode(udid)
         input('[*] Press ENTER when Device is in Recovery Mode > ')
