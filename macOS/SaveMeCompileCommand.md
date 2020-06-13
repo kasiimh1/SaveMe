@@ -1,2 +1,1 @@
-pyinstaller --onefile --add-data 'tsschecker':'/SupportFiles/' --add-data 'ideviceinfo':'/SupportFiles/' --add-data 'ideviceenterrecovery':'/SupportFiles/'  --add-data 'igetnonce':'/SupportFiles/' --add-data 'irecovery':'/SupportFiles/'  SaveMe.py
-
+pyinstaller --onefile --add-data 'tsschecker':'/SupportFiles/' --add-data 'ideviceinfo':'/SupportFiles/' --add-data 'ideviceenterrecovery':'/SupportFiles/'  --add-data 'igetnonce':'/SupportFiles/' --add-data 'irecovery':'/SupportFiles/' SaveMe.py --hidden-import=requests --clean
