@@ -74,7 +74,6 @@ def printCachedDevices():
     file = os.path.expanduser(args.s + '/SaveMe-Tickets/SaveMe-Devices')
     with open(file, mode='r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
-        
         for i in csv_reader:
             print("------------------------------------------------------------------------")
             print("-- Found Device --")
@@ -91,7 +90,6 @@ def printCachedDevices():
 def createSavePath(ecid, version):
     path = args.s + 'SaveMe-Tickets/' + ecid + '/'
     file = os.path.expanduser(path)
-
     if os.path.isdir(file) is False:
         try:
             os.mkdir(file)
@@ -123,29 +121,30 @@ def saveTicketsForCachedDevices(version):
             createSavePath(i['ecid'], version)
             requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/')
         print("------------------------------------------------------------------------")
-
+    
 def signedVersionChecker(model):
+    ret = None
     signedReq = requests.get("https://api.ipsw.me/v4/device/" + model + "?type=ipsw")
     print("-- Checking Currently Signed iOS Versions --")
     print("[A] IPSW.me API Response Code: ["+ str(signedReq.status_code) + "]")
-    ret = 0
     if signedReq.status_code == 200:
         print("-- Server Response --")
         api = json.loads(signedReq.text)
         apiLength = len(api['firmwares'])
         for i in range(apiLength):
-            if args.c == True and api['firmwares'][i]['signed'] == True:
+            if args.c == True and api['firmwares'][i]['signed'] == True or args.v == None and api['firmwares'][i]['signed'] == True:
                 print("[V] iOS", api['firmwares'][i]['version'], "is currently being signed for the:", api['identifier'])
                 if args.f == True:
                     saveTicketsForCachedDevices(api['firmwares'][i]['version'])
+                if args.t == True:
+                    ret = api['firmwares'][i]['version']
 
             if api['firmwares'][i]['version'] == args.v and api['firmwares'][i]['signed'] == True:
                 print("[V] iOS", api['firmwares'][i]['version'], "is currently being signed for the:", api['identifier'])
-                ret = 1
                 break
+            
             if api['firmwares'][i]['version'] == args.v and api['firmwares'][i]['signed'] != True:
                 print("[V] iOS", api['firmwares'][i]['version'], "is currently NOT being signed for the:", api['identifier'])
-                ret = -1
                 break
     return ret
 
@@ -164,8 +163,8 @@ def fetchAPNonce(udid):
     os.system('./irecovery -n')
     return APNonce
 
-defaultHashes = '27325c8258be46e69d9ee57fa9a8fbc28b873df434e5e702a8b27999551138ae','3a88b7c3802f2f0510abc432104a15ebd8bd7154',
-'15400076bc4c35a7c8caefdcae5bda69c140a11bce870548f0862aac28c194cc','603be133ff0bdfa0f83f21e74191cf6770ea43bb'
+# defaultHashes = '27325c8258be46e69d9ee57fa9a8fbc28b873df434e5e702a8b27999551138ae','3a88b7c3802f2f0510abc432104a15ebd8bd7154',
+# '15400076bc4c35a7c8caefdcae5bda69c140a11bce870548f0862aac28c194cc','603be133ff0bdfa0f83f21e74191cf6770ea43bb'
 
 parser = argparse.ArgumentParser(description='SaveMe: SHSH saver for macOS by Kasiimh1')
 parser.add_argument('-a', help='Add Device To Cache List (-d needed)', action='store_true')
@@ -182,15 +181,20 @@ parser.add_argument('-v', help='Set iOS Version For Saving Tickets')
 args = parser.parse_args()
 print('\nSaveMe v1.0 by Kasiimh1')
 
-if args.i != False:
+if args.i == True:
     installDependencies()
-
+    sys.exit(-1)
 if args.p == True:
+    if os.path.isfile(os.path.expanduser(args.s) + '/SaveMe-Tickets/SaveMe-Devices'):
         printCachedDevices()
-        sys.exit(-1)
-
+    else:
+        print('-- No Cached Device File Found, use -a -d to add device!')
+    sys.exit(-1)
 if args.c == True:
-    signedVersionChecker("iPhone11,2")
+    if os.path.isfile(os.path.expanduser(args.s) + '/SaveMe-Tickets/SaveMe-Devices'):
+        signedVersionChecker("iPhone11,2")
+    else:
+        print('-- No Cached Device File Found, use -a -d to add device!')
     sys.exit(-1)
 
 args.output = os.path.expanduser(args.s)
@@ -233,11 +237,9 @@ if udid != None and args.d == True:
 
 if args.a == True:
     print("-- Adding Device To Cached List --")    
-    if (os.path.isfile(savePath + 'SaveMe-Devices') is False):
+    if not os.path.isfile(os.path.expanduser(args.s) + '/SaveMe-Tickets/SaveMe-Devices'):
         try:
-            os.system("touch %s" %savePath + '/SaveMe-Devices')
-            data = '"name","boardid","model","generator","ecid","udid","platform","apnonce"'
-            writeDevicesToOutput(data, savePath)
+            os.system('cp ./SaveMe-Devices %s' %savePath + '/SaveMe-Devices')
         except FileExistsError:
             print('\n\n[*] Skipping creating SaveMe-Devices file as it already exists')
     if args.g == None:
@@ -255,17 +257,22 @@ if args.a == True:
 
 if args.t == True:
     print("-- Saving SHSH2 Ticket --")    
-    if args.v == None:
-        args.v = input('[*] Enter iOS Version To Save Ticket For: ')
-    else:
-        print('[*] iOS Version Saving SHSH2 Ticket For', args.v)
-    if (signedVersionChecker(product)) == 1:
+    signedOS = signedVersionChecker(product)
+
+    if (signedOS) != None:
+        if args.v == None:
+            print("-- No iOS Version Set, Defaulting To Latest iOS Version Being Signed! --")
+            print("-- iOS " + signedOS + " is Signed, Defaulting To That Versions --")
+        else:
+            print('[*] iOS Version Saving SHSH2 Ticket For', args.v)
         APNonce = fetchAPNonce(udid)
-        createSavePath(ecid, args.v)
-        savePath = savePath + '/' + ecid + '/' + args.v + '/'
-        requestDeviceTicket(product, ecid, boardid, args.v, APNonce, savePath)
+        createSavePath(ecid, signedOS)
+        savePath = savePath + '/' + ecid + '/' + signedOS + '/'
+        requestDeviceTicket(product, ecid, boardid, signedOS, APNonce, savePath)
         print('[*] File should be in:', savePath)
         command = 'open ' + savePath
         os.system(command)
         print('[*] Thanks for using SaveMe v1.0, Exiting Program')
-        sys.exit(-1)  
+    else:
+        print("-- Error iOS Version Not Signed --")
+    sys.exit(-1)  

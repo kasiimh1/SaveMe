@@ -4,9 +4,9 @@ block_cipher = None
 
 
 a = Analysis(['SaveMe.py'],
-             pathex=['/Users/kasiim/Documents/GitHub/SaveMe/v1.0'],
+             pathex=['/Users/kasiim/Documents/GitHub/SaveMe/macOS'],
              binaries=[],
-             datas=[('tsschecker', '/SupportFiles/'), ('ideviceinfo', '/SupportFiles/'), ('ideviceenterrecovery', '/SupportFiles/'), ('igetnonce', '/SupportFiles/'), ('irecovery', '/SupportFiles/')],
+             datas=[('tsschecker', '/SupportFiles/'), ('ideviceinfo', '/SupportFiles/'), ('ideviceenterrecovery', '/SupportFiles/'), ('igetnonce', '/SupportFiles/'), ('irecovery', '/SupportFiles/'), ('SaveMe-Devices', '/SupportFiles/')],
              hiddenimports=['requests'],
              hookspath=[],
              runtime_hooks=[],
