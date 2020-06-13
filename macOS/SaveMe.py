@@ -120,6 +120,7 @@ def saveTicketsForCachedDevices(version):
             print("-- Saving Ticket For Cached Device -- ")
             createSavePath(i['ecid'], version)
             requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/')
+            openFolder(args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/')
         print("------------------------------------------------------------------------")
     
 def signedVersionChecker(model):
@@ -152,6 +153,10 @@ def writeDevicesToOutput(data, path):
     f = open(path + "/SaveMe-Devices", "a")
     f.write(data)
     f.close()
+
+def openFolder(savePath):
+    print('[*] File should be in:', savePath)
+    os.system('open ' + savePath)
 
 def fetchAPNonce(udid):
     print('-- Fetching APNonce From Recovery Mode --')
@@ -269,9 +274,7 @@ if args.t == True:
         createSavePath(ecid, signedOS)
         savePath = savePath + '/' + ecid + '/' + signedOS + '/'
         requestDeviceTicket(product, ecid, boardid, signedOS, APNonce, savePath)
-        print('[*] File should be in:', savePath)
-        command = 'open ' + savePath
-        os.system(command)
+        openFolder(savePath)
         print('[*] Thanks for using SaveMe v1.0, Exiting Program')
     else:
         print("-- Error iOS Version Not Signed --")
