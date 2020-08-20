@@ -51,9 +51,9 @@ ___
 
 - Screenshots
 
-1. (https://github.com/kasiimh1/SaveMe/blob/master/macOS/Screenshots/Screenshot%202020-06-13%20at%2012.20.21.png)
-2. (https://github.com/kasiimh1/SaveMe/blob/master/macOS/Screenshots/Screenshot%202020-06-13%20at%2012.42.03.png)
-3. (https://github.com/kasiimh1/SaveMe/blob/master/macOS/Screenshots/Screenshot%202020-06-13%20at%2012.42.29.png)
+1. [https://github.com/kasiimh1/SaveMe/blob/master/macOS/Screenshots/Screenshot%202020-06-13%20at%2012.20.21.png]
+2. [https://github.com/kasiimh1/SaveMe/blob/master/macOS/Screenshots/Screenshot%202020-06-13%20at%2012.42.03.png]
+3. [https://github.com/kasiimh1/SaveMe/blob/master/macOS/Screenshots/Screenshot%202020-06-13%20at%2012.42.29.png]
 
 Uses the following tools
 - libimobiledevice - ideviceenterrecovery, ideviceinfo, irecovery https://github.com/libimobiledevice
