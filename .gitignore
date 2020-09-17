@@ -45,3 +45,4 @@ v1.0/build/SaveMe/warn-SaveMe.txt
 v1.0/build/SaveMe/xref-SaveMe.html
 v1.0/__pycache__/SaveMe.cpython-36.pyc
 *.pyc
+windows/SupportFiles/*
