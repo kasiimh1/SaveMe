@@ -1,4 +1,4 @@
-import sys, os, argparse, subprocess, json, csv, requests, webbrowser
+import sys, os, argparse, subprocess, json, csv, requests, webbrowser, paramiko, getpass
 from shutil import copyfile
 
 frozen = 'not'
@@ -12,6 +12,26 @@ else:
 
 replace = False
 exit = False
+
+def dumpDeviceTicket(saveTicketPath):
+    print("[*] Saving to: %s" %saveTicketPath)
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ip = input("Enter Devices IP: ")
+    password = getpass.getpass("root@" + ip + "'s password: ")
+    ssh.connect(ip, port=22, username='root', password = password)
+    print("Dumping Ticket from iOS FileSystem")
+    stdin, stdout, stderr = ssh.exec_command("cat /dev/rdisk1 | dd of=dump.raw bs=256 count=$((0x4000)) &> /dev/null")
+    print("Copying Dump to machine")
+    os.system("scp root@"+ ip + ":dump.raw %s/dump.raw" %saveTicketPath)
+    print("Converting Dump to Ticket")
+    subprocess.Popen('img4tool.exe --convert -s %s/dumped.shsh ' %saveTicketPath + ' %s/dump.raw'  %saveTicketPath, shell = True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf8')
+    os.remove('%s/dump.raw' %saveTicketPath)
+    process = subprocess.Popen('img4tool.exe -s %s/dumped.shsh' %saveTicketPath, shell = True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf8')
+    output = process.communicate()
+    stdOutput, stdErrValue = output
+    stdOutput = stdOutput.strip()
+    return dataReturn(stdOutput, stdErrValue)
 
 def requestDeviceTicket(d_id, d_ecid, d_boardid, d_ios, d_apnonce, d_save):
     process = subprocess.Popen('tsschecker.exe -d %s' %d_id + ' -e %s' %d_ecid + ' --boardconfig %s' %d_boardid + ' --ios %s' %d_ios + ' --apnonce %s' %d_apnonce + ' -s --save-path %s' %d_save, shell = True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf8')
@@ -111,7 +131,8 @@ def saveTicketsForCachedDevices(version):
             print("-- Saving Ticket For Cached Device -- ")
             createSavePath(i['ecid'], version)
             requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/')
-            subprocess.run(['explorer', os.path.realpath(args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/' )])
+            if args.o:
+                subprocess.run(['explorer', os.path.realpath(args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/' )])
         print("------------------------------------------------------------------------")
     
 def signedVersionChecker(model):
@@ -164,19 +185,22 @@ def fetchAPNonce(udid):
 
 parser = argparse.ArgumentParser(description='SaveMe: SHSH saver for macOS by Kasiimh1')
 parser.add_argument('-a', help='Add Device To Cache List (-d needed)', action='store_true')
-parser.add_argument('-c', help='Check Currently Signed iOS Versions', action='store_true') 
+parser.add_argument('-c', help='Check Currently Signed iOS Versions (uses iPhone11,2 by default) or use -m to specify model', action='store_true') 
 parser.add_argument('-d', help='Fetch Information From Device', action='store_true')
 parser.add_argument('-f', help='Save SHSH2 Tickets For Cached Devices (-c needed)', action='store_true') 
 parser.add_argument('-g', help='Specifiy Custom Generator')
 parser.add_argument('-l', help='Debug Log for TSSChecker', action='store_true')
+parser.add_argument('-o', help='Open Folder after Tickets are Saved', action='store_true')
 parser.add_argument('-p', help='Print Cached Devices', action='store_true')
+parser.add_argument('-m', help='Set Device Model e.g. iPhone11,2 (used with -c)')
 parser.add_argument('-s', help='Set Custom SHSH2 Save Path', default=os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop/'))
 parser.add_argument('-t', help='Save SHSH2 Ticket', action='store_true')
 parser.add_argument('-v', help='Set iOS Version For Saving Tickets')
+parser.add_argument('-x', help='Dump Ticket from Device', action='store_true')
 
 args = parser.parse_args()
 folderPath = 'C:/Users'
-print('\nSaveMe v1.0 by Kasiimh1')
+print('\nSaveMe v1.2 by Kasiimh1')
 
 if args.p == True:
     if os.path.isfile(os.path.expanduser(args.s) + '/SaveMe-Tickets/SaveMe-Devices'):
@@ -185,10 +209,10 @@ if args.p == True:
         print('-- No Cached Device File Found, use -a -d to add device!')
     sys.exit(-1)
 if args.c == True:
-    if os.path.isfile(os.path.expanduser(args.s) + '/SaveMe-Tickets/SaveMe-Devices'):
-        signedVersionChecker("iPhone11,2")
+    if args.m:
+        signedVersionChecker(args.m)
     else:
-        print('-- No Cached Device File Found, use -a -d to add device!')
+        signedVersionChecker("iPhone11,2")
     sys.exit(-1)
 
 args.output = os.path.expanduser(args.s)
@@ -208,26 +232,33 @@ if (os.path.isdir(savePath + 'SaveMe-Tickets') is False):
 
 savePath = savePath + 'SaveMe-Tickets'
 os.chdir(bundle_dir)
-input('[*] Press ENTER when Device is connected > ')
-os.chdir(os.getcwd() + '/SupportFiles/')
-udid = deviceExtractionTool('ideviceinfo.exe', 16, 'UniqueDeviceID: ', False)
-ecid = deviceExtractionTool('ideviceinfo.exe', 13, 'UniqueChipID: ', True)
-platform = deviceExtractionTool('ideviceinfo.exe', 18, 'HardwarePlatform: ', False)
-product = deviceExtractionTool('ideviceinfo.exe', 13, 'ProductType: ', False)
-user = deviceExtractionTool('ideviceinfo.exe', 12, 'DeviceName: ', False)
-boardid = deviceExtractionTool('ideviceinfo.exe', 15, 'HardwareModel: ', False)
-APNonce = None
-generator = None
 
-if udid != None and args.d == True:
-    print("[*] Fetching Infromation From Device")                
-    print("-- Device Information --")                
-    print('[D] Found ' + user)
-    print('[D] Device is:', product)
-    print('[D] BoardID is:', boardid)
-    print('[D] Found Device: UDID:', udid)
-    print('[D] ECID:', ecid)
-    print('[D] Device Platform:', platform)
+if args.x:
+    print("[*] Dumping Ticket from Device!")
+    os.chdir(os.getcwd() + '/SupportFiles/')
+    dumpDeviceTicket(savePath)
+
+if args.a and args.d:
+    input('[*] Press ENTER when Device is connected > ')
+    os.chdir(os.getcwd() + '/SupportFiles/')
+    udid = deviceExtractionTool('ideviceinfo.exe', 16, 'UniqueDeviceID: ', False)
+    ecid = deviceExtractionTool('ideviceinfo.exe', 13, 'UniqueChipID: ', True)
+    platform = deviceExtractionTool('ideviceinfo.exe', 18, 'HardwarePlatform: ', False)
+    product = deviceExtractionTool('ideviceinfo.exe', 13, 'ProductType: ', False)
+    user = deviceExtractionTool('ideviceinfo.exe', 12, 'DeviceName: ', False)
+    boardid = deviceExtractionTool('ideviceinfo.exe', 15, 'HardwareModel: ', False)
+    APNonce = None
+    generator = None
+
+    if udid != None and args.d == True:
+        print("[*] Fetching Infromation From Device")                
+        print("-- Device Information --")                
+        print('[D] Found ' + user)
+        print('[D] Device is:', product)
+        print('[D] BoardID is:', boardid)
+        print('[D] Found Device: UDID:', udid)
+        print('[D] ECID:', ecid)
+        print('[D] Device Platform:', platform)  
 
 if args.a == True:
     print("-- Adding Device To Cached List --")    
@@ -263,8 +294,13 @@ if args.t == True:
         createSavePath(ecid, signedOS)
         savePath = savePath + '/' + ecid + '/' + signedOS + '/'
         requestDeviceTicket(product, ecid, boardid, signedOS, APNonce, savePath)
-        subprocess.run(['explorer', os.path.realpath(savePath)])
+        if args.o:
+            subprocess.run(['explorer', os.path.realpath(savePath)])
         print('[*] Thanks for using SaveMe v1.0, Exiting Program')
     else:
         print("-- Error iOS Version Not Signed --")
+    sys.exit(-1)  
+
+if not args.a and not args.c and not args.d and not args.f and not args.l and not args.p and not args.t and not args.x:
+    parser.print_help()
     sys.exit(-1)  
