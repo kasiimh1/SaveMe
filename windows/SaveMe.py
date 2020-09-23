@@ -20,18 +20,25 @@ def dumpDeviceTicket(saveTicketPath):
     ip = input("Enter Devices IP: ")
     password = getpass.getpass("root@" + ip + "'s password: ")
     ssh.connect(ip, port=22, username='root', password = password)
+    print("Installing Dependancies")
+    os.system("scp img4tool_192_iphoneos-arm.deb root@"+ ip + ":img4tool_192_iphoneos-arm.deb")
+    os.system("scp libssl1.1_1.1.1g_iphoneos-arm.deb root@"+ ip + ":libssl1.1_1.1.1g_iphoneos-arm.deb")
+    os.system("scp libgeneral_31_iphoneos-arm.deb root@"+ ip + ":libgeneral_31_iphoneos-arm.deb")
+    os.system("scp libimg4tool0_192_iphoneos-arm.deb root@"+ ip + ":libimg4tool0_192_iphoneos-arm.deb")
+    os.system("scp libplist3_2.2.0_iphoneos-arm.deb root@"+ ip + ":libplist3_2.2.0_iphoneos-arm.deb")
+    os.system("ssh root@"+ ip + " dpkg -i libplist3_2.2.0_iphoneos-arm.deb")
+    os.system("ssh root@"+ ip + " dpkg -i libssl1.1_1.1.1g_iphoneos-arm.deb")
+    os.system("ssh root@"+ ip + " dpkg -i libgeneral_31_iphoneos-arm.deb")
+    os.system("ssh root@"+ ip + " dpkg -i libimg4tool0_192_iphoneos-arm.deb")
+    os.system("ssh root@"+ ip + " dpkg -i img4tool_192_iphoneos-arm.deb")
     print("Dumping Ticket from iOS FileSystem")
     stdin, stdout, stderr = ssh.exec_command("cat /dev/rdisk1 | dd of=dump.raw bs=256 count=$((0x4000)) &> /dev/null")
-    print("Copying Dump to machine")
-    os.system("scp root@"+ ip + ":dump.raw %s/dump.raw" %saveTicketPath)
     print("Converting Dump to Ticket")
-    subprocess.Popen('img4tool.exe --convert -s %s/dumped.shsh ' %saveTicketPath + ' %s/dump.raw'  %saveTicketPath, shell = True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf8')
-    os.remove('%s/dump.raw' %saveTicketPath)
-    process = subprocess.Popen('img4tool.exe -s %s/dumped.shsh' %saveTicketPath, shell = True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf8')
-    output = process.communicate()
-    stdOutput, stdErrValue = output
-    stdOutput = stdOutput.strip()
-    return dataReturn(stdOutput, stdErrValue)
+    os.system("ssh root@"+ ip + " img4tool --convert -s dumped.shsh dump.raw")
+    print("Copying Dump to machine")
+    os.system("scp root@"+ ip + ":dumped.shsh %s/dumped.shsh" %saveTicketPath)
+    if args.o:
+            subprocess.run(['explorer', os.path.realpath('%s/dumped.shsh' %saveTicketPath)])
 
 def requestDeviceTicket(d_id, d_ecid, d_boardid, d_ios, d_apnonce, d_save):
     process = subprocess.Popen('tsschecker.exe -d %s' %d_id + ' -e %s' %d_ecid + ' --boardconfig %s' %d_boardid + ' --ios %s' %d_ios + ' --apnonce %s' %d_apnonce + ' -s --save-path %s' %d_save, shell = True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf8')
@@ -199,7 +206,6 @@ parser.add_argument('-v', help='Set iOS Version For Saving Tickets')
 parser.add_argument('-x', help='Dump Ticket from Device', action='store_true')
 
 args = parser.parse_args()
-folderPath = 'C:/Users'
 print('\nSaveMe v1.2 by Kasiimh1')
 
 if args.p == True:
