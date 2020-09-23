@@ -22,4 +22,4 @@ stdin, stdout, stderr = ssh.exec_command("cat /dev/rdisk1 | dd of=dump.raw bs=25
 print("Converting Dump to Ticket")
 os.system("ssh root@"+ ip + " img4tool --convert -s dumped.shsh dump.raw")
 print("Copying Dump to machine")
-os.system("scp root@192.168.0.3:dumped.shsh dumped.shsh")
+os.system("scp root@"+ ip + ":dumped.shsh dumped.shsh")
