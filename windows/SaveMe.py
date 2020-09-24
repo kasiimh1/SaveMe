@@ -40,8 +40,8 @@ def dumpDeviceTicket(saveTicketPath):
     if args.o:
             subprocess.run(['explorer', os.path.realpath('%s/dumped.shsh' %saveTicketPath)])
 
-def requestDeviceTicket(d_id, d_ecid, d_boardid, d_ios, d_apnonce, d_save):
-    process = subprocess.Popen('tsschecker.exe -d %s' %d_id + ' -e %s' %d_ecid + ' --boardconfig %s' %d_boardid + ' --ios %s' %d_ios + ' --apnonce %s' %d_apnonce + ' -s --save-path %s' %d_save, shell = True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf8')
+def requestDeviceTicket(d_id, d_ecid, d_boardid, d_ios, d_apnonce, d_save, d_ota):
+    process = subprocess.Popen('tsschecker.exe -d %s' %d_id + ' -e %s' %d_ecid + ' --boardconfig %s' %d_boardid + ' --ios %s' %d_ios + ' --apnonce %s' %d_apnonce + ' -s --save-path %s' %d_save + ' %s' %d_ota, shell = True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf8')
     if args.l:
         output = process.communicate()
         stdOutput, stdErrValue = output
@@ -136,8 +136,15 @@ def saveTicketsForCachedDevices(version):
             print("[D] Generator: " + i['generator'])
             print("[D] APNonce: " + i['apnonce'])
             print("-- Saving Ticket For Cached Device -- ")
-            createSavePath(i['ecid'], version)
-            requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/')
+            createSavePath(i['ecid'], version)  
+            if not i['boardid'].find("J105aAP") == True and not i['boardid'].find("J42dAP") == True and not i['boardid'].find("K66AP") == True and not i['boardid'].find("J33IAP") == True and not i['boardid'].find("J33AP") == True:
+                print("[*] --------------------------- DEVICE NEEDS REGULAR BLOBS -------------------------------------")
+                ota = ''
+                requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/', ota)
+            if i['boardid'].find("J105aAP") or i['boardid'].find("J42dAP") or i['boardid'].find("K66AP") or i['boardid'].find("J33IAP") or i['boardid'].find("J33AP"):
+                print("[*] --------------------------- DEVICE NEEDS OTA BLOBS -------------------------------------")
+                ota = ' -o'
+                requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/', ota)
             if args.o:
                 subprocess.run(['explorer', os.path.realpath(args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/' )])
         print("------------------------------------------------------------------------")
