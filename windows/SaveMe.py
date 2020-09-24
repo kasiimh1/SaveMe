@@ -222,7 +222,7 @@ if args.print == True:
     else:
         print('-- No Cached Device File Found, use -a -d to add device!')
     sys.exit(-1)
-if args.checkheck == True:
+if args.check == True:
     if args.model:
         signedVersionChecker(args.model)
     else:
