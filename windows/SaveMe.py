@@ -37,12 +37,12 @@ def dumpDeviceTicket(saveTicketPath):
     os.system("ssh root@"+ ip + " img4tool --convert -s dumped.shsh dump.raw")
     print("Copying Dump to machine")
     os.system("scp root@"+ ip + ":dumped.shsh %s/dumped.shsh" %saveTicketPath)
-    if args.o:
+    if args.open:
             subprocess.run(['explorer', os.path.realpath('%s/dumped.shsh' %saveTicketPath)])
 
 def requestDeviceTicket(d_id, d_ecid, d_boardid, d_ios, d_apnonce, d_save, d_ota):
     process = subprocess.Popen('tsschecker.exe -d %s' %d_id + ' -e %s' %d_ecid + ' --boardconfig %s' %d_boardid + ' --ios %s' %d_ios + ' --apnonce %s' %d_apnonce + ' -s --save-path %s' %d_save + ' %s' %d_ota, shell = True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf8')
-    if args.l:
+    if args.log:
         output = process.communicate()
         stdOutput, stdErrValue = output
         stdOutput = stdOutput.strip()
@@ -89,7 +89,7 @@ def dataReturn(output, error):
     return ret
 
 def printCachedDevices():
-    file = os.path.expanduser(args.s + '/SaveMe-Tickets/SaveMe-Devices')
+    file = os.path.expanduser(args.path + '/SaveMe-Tickets/SaveMe-Devices')
     with open(file, mode='r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for i in csv_reader:
@@ -106,7 +106,7 @@ def printCachedDevices():
         print("------------------------------------------------------------------------")
 
 def createSavePath(ecid, version):
-    path = args.s + 'SaveMe-Tickets/' + ecid + '/'
+    path = args.path + 'SaveMe-Tickets/' + ecid + '/'
     file = os.path.expanduser(path)
     if os.path.isdir(file) is False:
         try:
@@ -121,7 +121,7 @@ def createSavePath(ecid, version):
             print('[*] Skipping creating iOS version folder as %s it already exists' %ecid)
 
 def saveTicketsForCachedDevices(version):
-    file = os.path.expanduser(args.s + 'SaveMe-Tickets/SaveMe-Devices')
+    file = os.path.expanduser(args.path + 'SaveMe-Tickets/SaveMe-Devices')
     with open(file, mode='r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for i in csv_reader:
@@ -140,13 +140,13 @@ def saveTicketsForCachedDevices(version):
             if i['boardid'].find("J105AAP") == 0 or i['boardid'].find("J42DAP") == 0 or i['boardid'].find("K66AP") == 0 or i['boardid'].find("J33IAP") == 0 or i['boardid'].find("J33AP") == 0:
                 print("[*] REQUESTING OTA TICKETS")
                 ota = ' -o'
-                requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/', ota)
+                requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.path + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/', ota)
             else:
                 print("[*] REQUESTING REGULAR TICKETS")
                 ota = ''
-                requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/', ota)
-            if args.o:
-                subprocess.run(['explorer', os.path.realpath(args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/' )])
+                requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.path + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/', ota)
+            if args.open:
+                subprocess.run(['explorer', os.path.realpath(args.path + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/' )])
         print("------------------------------------------------------------------------")
     
 def signedVersionChecker(model):
@@ -159,18 +159,18 @@ def signedVersionChecker(model):
         api = json.loads(signedReq.text)
         apiLength = len(api['firmwares'])
         for i in range(apiLength):
-            if args.c == True and api['firmwares'][i]['signed'] == True or args.v == None and api['firmwares'][i]['signed'] == True:
+            if args.check == True and api['firmwares'][i]['signed'] == True or args.version == None and api['firmwares'][i]['signed'] == True:
                 print("[V] iOS", api['firmwares'][i]['version'], "is currently being signed for the:", api['identifier'])
-                if args.f == True:
+                if args.savecached == True:
                     saveTicketsForCachedDevices(api['firmwares'][i]['version'])
-                if args.t == True:
+                if args.save == True:
                     ret = api['firmwares'][i]['version']
 
-            if api['firmwares'][i]['version'] == args.v and api['firmwares'][i]['signed'] == True:
+            if api['firmwares'][i]['version'] == args.version and api['firmwares'][i]['signed'] == True:
                 print("[V] iOS", api['firmwares'][i]['version'], "is currently being signed for the:", api['identifier'])
                 break
             
-            if api['firmwares'][i]['version'] == args.v and api['firmwares'][i]['signed'] != True:
+            if api['firmwares'][i]['version'] == args.version and api['firmwares'][i]['signed'] != True:
                 print("[V] iOS", api['firmwares'][i]['version'], "is currently NOT being signed for the:", api['identifier'])
                 break
     return ret
@@ -198,38 +198,38 @@ def fetchAPNonce(udid):
 # '15400076bc4c35a7c8caefdcae5bda69c140a11bce870548f0862aac28c194cc','603be133ff0bdfa0f83f21e74191cf6770ea43bb'
 
 parser = argparse.ArgumentParser(description='SaveMe: SHSH saver for macOS by Kasiimh1')
-parser.add_argument('-a', help='Add Device To Cache List (-d needed)', action='store_true')
-parser.add_argument('-c', help='Check Currently Signed iOS Versions (uses iPhone11,2 by default) or use -m to specify model', action='store_true') 
-parser.add_argument('-d', help='Fetch Information From Device', action='store_true')
-parser.add_argument('-f', help='Save SHSH2 Tickets For Cached Devices (-c needed)', action='store_true') 
-parser.add_argument('-g', help='Specifiy Custom Generator')
-parser.add_argument('-l', help='Debug Log for TSSChecker', action='store_true')
-parser.add_argument('-o', help='Open Folder after Tickets are Saved', action='store_true')
+parser.add_argument('-add', help='Add Device To Cache List (-d needed)', action='store_true')
+parser.add_argument('-check', help='Check Currently Signed iOS Versions (uses iPhone11,2 by default) or use -m to specify model', action='store_true') 
+parser.add_argument('-info', help='Fetch Information From Device', action='store_true')
+parser.add_argument('-savecached', help='Save SHSH2 Tickets For Cached Devices (-check needed)', action='store_true') 
+parser.add_argument('-generator', help='Specifiy Custom Generator')
+parser.add_argument('-log', help='Debug Log for TSSChecker', action='store_true')
+parser.add_argument('-open', help='Open Folder after Tickets are Saved', action='store_true')
 parser.add_argument('-ota', help='Request OTA Tickets to be Saved', action='store_true')
-parser.add_argument('-p', help='Print Cached Devices', action='store_true')
-parser.add_argument('-m', help='Set Device Model e.g. iPhone11,2 (used with -c)')
-parser.add_argument('-s', help='Set Custom SHSH2 Save Path', default=os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop/'))
-parser.add_argument('-t', help='Save SHSH2 Ticket', action='store_true')
-parser.add_argument('-v', help='Set iOS Version For Saving Tickets')
-parser.add_argument('-x', help='Dump Ticket from Device', action='store_true')
+parser.add_argument('-print', help='Print Cached Devices', action='store_true')
+parser.add_argument('-model', help='Set Device Model e.g. iPhone11,2 (used with -c)')
+parser.add_argument('-path', help='Set Custom SHSH2 Save Path', default=os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop/'))
+parser.add_argument('-save', help='Save SHSH2 Ticket', action='store_true')
+parser.add_argument('-version', help='Set iOS Version For Saving Tickets')
+parser.add_argument('-extract', help='Dump Ticket from Device', action='store_true')
 
 args = parser.parse_args()
 print('\nSaveMe v1.2 by Kasiimh1')
 
-if args.p == True:
-    if os.path.isfile(os.path.expanduser(args.s) + '/SaveMe-Tickets/SaveMe-Devices'):
+if args.print == True:
+    if os.path.isfile(os.path.expanduser(args.path) + '/SaveMe-Tickets/SaveMe-Devices'):
         printCachedDevices()
     else:
         print('-- No Cached Device File Found, use -a -d to add device!')
     sys.exit(-1)
-if args.c == True:
-    if args.m:
-        signedVersionChecker(args.m)
+if args.checkheck == True:
+    if args.model:
+        signedVersionChecker(args.model)
     else:
         signedVersionChecker("iPhone11,2")
     sys.exit(-1)
 
-args.output = os.path.expanduser(args.s)
+args.output = os.path.expanduser(args.path)
 savePath = args.output
 
 if (os.path.isdir(savePath) is False):
@@ -247,12 +247,12 @@ if (os.path.isdir(savePath + 'SaveMe-Tickets') is False):
 savePath = savePath + 'SaveMe-Tickets'
 os.chdir(bundle_dir)
 
-if args.x:
+if args.extract:
     print("[*] Dumping Ticket from Device!")
     os.chdir(os.getcwd() + '/SupportFiles/')
     dumpDeviceTicket(savePath)
 
-if args.a and args.d:
+if args.add and args.info:
     input('[*] Press ENTER when Device is connected > ')
     os.chdir(os.getcwd() + '/SupportFiles/')
     udid = deviceExtractionTool('ideviceinfo.exe', 16, 'UniqueDeviceID: ', False)
@@ -264,7 +264,7 @@ if args.a and args.d:
     APNonce = None
     generator = None
 
-    if udid != None and args.d == True:
+    if udid != None and args.info == True:
         print("[*] Fetching Infromation From Device")                
         print("-- Device Information --")                
         print('[D] Found ' + user)
@@ -274,19 +274,19 @@ if args.a and args.d:
         print('[D] ECID:', ecid)
         print('[D] Device Platform:', platform)  
 
-if args.a == True:
+if args.add == True:
     print("-- Adding Device To Cached List --")    
-    if not os.path.isfile(os.path.expanduser(args.s) + '/SaveMe-Tickets/SaveMe-Devices'):
+    if not os.path.isfile(os.path.expanduser(args.path) + '/SaveMe-Tickets/SaveMe-Devices'):
         try:
             copyfile('SaveMe-Devices', '%s' %savePath + '/SaveMe-Devices')
         except FileExistsError:
             print('\n\n[*] Skipping creating SaveMe-Devices file as it already exists')
-    if args.g == None:
+    if args.generator == None:
         print("[*] Using Unc0ver's Generator!")
         generator = "0x1111111111111111"
     else:
         print("[*] User Using Custom Generator!")
-        generator = args.g
+        generator = args.generator
 
     APNonce = fetchAPNonce(udid)
     data = '\n"' + user + '","' + boardid + '","' + product + '","' + generator + '","' + ecid + '","' + udid + '","' + platform + '","' + APNonce + '"'
@@ -294,29 +294,29 @@ if args.a == True:
     print('[*] Thanks for using SaveMe v1.0, Exiting Program')
     sys.exit(-1)
 
-if args.t == True:
+if args.save == True:
     print("-- Saving SHSH2 Ticket --")    
     signedOS = signedVersionChecker(product)
 
     if (signedOS) != None:
-        if args.v == None:
+        if args.version == None:
             print("-- No iOS Version Set, Defaulting To Latest iOS Version Being Signed! --")
             print("-- iOS " + signedOS + " is Signed, Defaulting To That Versions --")
         else:
-            print('[*] iOS Version Saving SHSH2 Ticket For', args.v)
+            print('[*] iOS Version Saving SHSH2 Ticket For', args.version)
         APNonce = fetchAPNonce(udid)
         createSavePath(ecid, signedOS)
         savePath = savePath + '/' + ecid + '/' + signedOS + '/'
         if args.ota:
             ota = '-o'
         requestDeviceTicket(product, ecid, boardid, signedOS, APNonce, savePath, ota)
-        if args.o:
+        if args.open:
             subprocess.run(['explorer', os.path.realpath(savePath)])
         print('[*] Thanks for using SaveMe v1.0, Exiting Program')
     else:
         print("-- Error iOS Version Not Signed --")
     sys.exit(-1)  
 
-if not args.a and not args.c and not args.d and not args.f and not args.l and not args.p and not args.t and not args.x and not args.ota:
+if not args.add and not args.checkheck and not args.info and not args.savecached and not args.log and not args.print and not args.save and not args.extract and not args.ota:
     parser.print_help()
     sys.exit(-1)  
