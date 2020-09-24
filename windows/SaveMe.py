@@ -138,11 +138,11 @@ def saveTicketsForCachedDevices(version):
             print("-- Saving Ticket For Cached Device -- ")
             createSavePath(i['ecid'], version)  
             if not i['boardid'].find("J105aAP") == True and not i['boardid'].find("J42dAP") == True and not i['boardid'].find("K66AP") == True and not i['boardid'].find("J33IAP") == True and not i['boardid'].find("J33AP") == True:
-                print("[*] --------------------------- DEVICE NEEDS REGULAR BLOBS -------------------------------------")
+                print("[*] REQUESTING REGULAR TICKETS")
                 ota = ''
                 requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/', ota)
             if i['boardid'].find("J105aAP") or i['boardid'].find("J42dAP") or i['boardid'].find("K66AP") or i['boardid'].find("J33IAP") or i['boardid'].find("J33AP"):
-                print("[*] --------------------------- DEVICE NEEDS OTA BLOBS -------------------------------------")
+                print("[*] REQUESTING OTA TICKETS")
                 ota = ' -o'
                 requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/', ota)
             if args.o:
@@ -205,6 +205,7 @@ parser.add_argument('-f', help='Save SHSH2 Tickets For Cached Devices (-c needed
 parser.add_argument('-g', help='Specifiy Custom Generator')
 parser.add_argument('-l', help='Debug Log for TSSChecker', action='store_true')
 parser.add_argument('-o', help='Open Folder after Tickets are Saved', action='store_true')
+parser.add_argument('-o', help='Request OTA Tickets to be Saved', action='store_true')
 parser.add_argument('-p', help='Print Cached Devices', action='store_true')
 parser.add_argument('-m', help='Set Device Model e.g. iPhone11,2 (used with -c)')
 parser.add_argument('-s', help='Set Custom SHSH2 Save Path', default=os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop/'))
@@ -306,7 +307,9 @@ if args.t == True:
         APNonce = fetchAPNonce(udid)
         createSavePath(ecid, signedOS)
         savePath = savePath + '/' + ecid + '/' + signedOS + '/'
-        requestDeviceTicket(product, ecid, boardid, signedOS, APNonce, savePath)
+        if args.ota:
+            ota = '-o'
+        requestDeviceTicket(product, ecid, boardid, signedOS, APNonce, savePath, ota)
         if args.o:
             subprocess.run(['explorer', os.path.realpath(savePath)])
         print('[*] Thanks for using SaveMe v1.0, Exiting Program')
@@ -314,6 +317,6 @@ if args.t == True:
         print("-- Error iOS Version Not Signed --")
     sys.exit(-1)  
 
-if not args.a and not args.c and not args.d and not args.f and not args.l and not args.p and not args.t and not args.x:
+if not args.a and not args.c and not args.d and not args.f and not args.l and not args.p and not args.t and not args.x and not args.ota:
     parser.print_help()
     sys.exit(-1)  
