@@ -137,13 +137,13 @@ def saveTicketsForCachedDevices(version):
             print("[D] APNonce: " + i['apnonce'])
             print("-- Saving Ticket For Cached Device -- ")
             createSavePath(i['ecid'], version)  
-            if not i['boardid'].find("J105aAP") == True and not i['boardid'].find("J42dAP") == True and not i['boardid'].find("K66AP") == True and not i['boardid'].find("J33IAP") == True and not i['boardid'].find("J33AP") == True:
-                print("[*] REQUESTING REGULAR TICKETS")
-                ota = ''
-                requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/', ota)
-            if i['boardid'].find("J105aAP") or i['boardid'].find("J42dAP") or i['boardid'].find("K66AP") or i['boardid'].find("J33IAP") or i['boardid'].find("J33AP"):
+            if i['boardid'].find("J105AAP") == 0 or i['boardid'].find("J42DAP") == 0 or i['boardid'].find("K66AP") == 0 or i['boardid'].find("J33IAP") == 0 or i['boardid'].find("J33AP") == 0:
                 print("[*] REQUESTING OTA TICKETS")
                 ota = ' -o'
+                requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/', ota)
+            else:
+                print("[*] REQUESTING REGULAR TICKETS")
+                ota = ''
                 requestDeviceTicket(i['model'], i['ecid'], i['boardid'], version, i['apnonce'],  args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/', ota)
             if args.o:
                 subprocess.run(['explorer', os.path.realpath(args.s + 'SaveMe-Tickets/' + i['ecid'] + '/' + version + '/' )])
@@ -205,7 +205,7 @@ parser.add_argument('-f', help='Save SHSH2 Tickets For Cached Devices (-c needed
 parser.add_argument('-g', help='Specifiy Custom Generator')
 parser.add_argument('-l', help='Debug Log for TSSChecker', action='store_true')
 parser.add_argument('-o', help='Open Folder after Tickets are Saved', action='store_true')
-parser.add_argument('-o', help='Request OTA Tickets to be Saved', action='store_true')
+parser.add_argument('-ota', help='Request OTA Tickets to be Saved', action='store_true')
 parser.add_argument('-p', help='Print Cached Devices', action='store_true')
 parser.add_argument('-m', help='Set Device Model e.g. iPhone11,2 (used with -c)')
 parser.add_argument('-s', help='Set Custom SHSH2 Save Path', default=os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop/'))
