@@ -5,13 +5,13 @@ frozen = 'not'
 if getattr(sys, 'frozen', False):
     # we are running in a bundle
     frozen = 'ever so'
-    bundle_dir = sys._MEIPASS
+    bundle_dir = sys._MEIPASS 
 else:
     # we are running in a normal Python environment
     bundle_dir = os.path.dirname(os.path.abspath(__file__))
 
 replace = False
-exit = False
+# exit = False
 
 def dumpDeviceTicket(saveTicketPath):
     print("[*] Saving to: %s" %saveTicketPath)
@@ -197,9 +197,9 @@ def fetchAPNonce(udid):
 # defaultHashes = '27325c8258be46e69d9ee57fa9a8fbc28b873df434e5e702a8b27999551138ae','3a88b7c3802f2f0510abc432104a15ebd8bd7154',
 # '15400076bc4c35a7c8caefdcae5bda69c140a11bce870548f0862aac28c194cc','603be133ff0bdfa0f83f21e74191cf6770ea43bb'
 
-parser = argparse.ArgumentParser(description='SaveMe: SHSH saver for macOS by Kasiimh1')
-parser.add_argument('-add', help='Add Device To Cache List (-d needed)', action='store_true')
-parser.add_argument('-check', help='Check Currently Signed iOS Versions (uses iPhone11,2 by default) or use -m to specify model', action='store_true') 
+parser = argparse.ArgumentParser(description='SaveMe: SHSH saver for Windows and macOS by Kasiimh1')
+parser.add_argument('-add', help='Add Device To Cache List (-info needed)', action='store_true')
+parser.add_argument('-check', help='Check Currently Signed iOS Versions (uses iPhone11,2 by default) or use -model to specify model', action='store_true') 
 parser.add_argument('-info', help='Fetch Information From Device', action='store_true')
 parser.add_argument('-savecached', help='Save SHSH2 Tickets For Cached Devices (-check needed)', action='store_true') 
 parser.add_argument('-generator', help='Specifiy Custom Generator')
@@ -207,14 +207,19 @@ parser.add_argument('-log', help='Debug Log for TSSChecker', action='store_true'
 parser.add_argument('-open', help='Open Folder after Tickets are Saved', action='store_true')
 parser.add_argument('-ota', help='Request OTA Tickets to be Saved', action='store_true')
 parser.add_argument('-print', help='Print Cached Devices', action='store_true')
-parser.add_argument('-model', help='Set Device Model e.g. iPhone11,2 (used with -c)')
+parser.add_argument('-model', help='Set Device Model e.g. iPhone11,2 (used with -check)')
 parser.add_argument('-path', help='Set Custom SHSH2 Save Path', default=os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop/'))
 parser.add_argument('-save', help='Save SHSH2 Ticket', action='store_true')
 parser.add_argument('-version', help='Set iOS Version For Saving Tickets')
 parser.add_argument('-extract', help='Dump Ticket from Device', action='store_true')
 
 args = parser.parse_args()
-print('\nSaveMe v1.2 by Kasiimh1')
+print('\nSaveMe v1.3 by Kasiimh1')
+
+os.chdir(bundle_dir)
+os.chdir(os.getcwd() + '/SupportFiles/')
+
+#print("Support Files at %s " %(os.getcwd()))
 
 if args.print == True:
     if os.path.isfile(os.path.expanduser(args.path) + '/SaveMe-Tickets/SaveMe-Devices'):
@@ -245,7 +250,6 @@ if (os.path.isdir(savePath + 'SaveMe-Tickets') is False):
         print('\n\n[*] Skipping creating SaveMe folder as it already exists')
 
 savePath = savePath + 'SaveMe-Tickets'
-os.chdir(bundle_dir)
 
 if args.extract:
     print("[*] Dumping Ticket from Device!")
@@ -317,6 +321,6 @@ if args.save == True:
         print("-- Error iOS Version Not Signed --")
     sys.exit(-1)  
 
-if not args.add and not args.checkheck and not args.info and not args.savecached and not args.log and not args.print and not args.save and not args.extract and not args.ota:
+if not args.add and not args.check and not args.info and not args.savecached and not args.log and not args.print and not args.save and not args.extract and not args.ota:
     parser.print_help()
     sys.exit(-1)  
