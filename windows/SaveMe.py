@@ -218,7 +218,6 @@ print('\nSaveMe v1.3 by Kasiimh1')
 
 os.chdir(bundle_dir)
 os.chdir(os.getcwd() + '/SupportFiles/')
-
 #print("Support Files at %s " %(os.getcwd()))
 
 if args.print == True:
@@ -253,12 +252,12 @@ savePath = savePath + 'SaveMe-Tickets'
 
 if args.extract:
     print("[*] Dumping Ticket from Device!")
-    os.chdir(os.getcwd() + '/SupportFiles/')
+    #os.chdir(os.getcwd() + '/SupportFiles/')
     dumpDeviceTicket(savePath)
 
 if args.add and args.info:
     input('[*] Press ENTER when Device is connected > ')
-    os.chdir(os.getcwd() + '/SupportFiles/')
+    #os.chdir(os.getcwd() + '/SupportFiles/')
     udid = deviceExtractionTool('ideviceinfo.exe', 16, 'UniqueDeviceID: ', False)
     ecid = deviceExtractionTool('ideviceinfo.exe', 13, 'UniqueChipID: ', True)
     platform = deviceExtractionTool('ideviceinfo.exe', 18, 'HardwarePlatform: ', False)
