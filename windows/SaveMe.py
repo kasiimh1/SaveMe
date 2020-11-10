@@ -9,9 +9,8 @@ if getattr(sys, 'frozen', False):
 else:
     # we are running in a normal Python environment
     bundle_dir = os.path.dirname(os.path.abspath(__file__))
-
+    
 replace = False
-# exit = False
 
 def dumpDeviceTicket(saveTicketPath):
     print("[*] Saving to: %s" %saveTicketPath)
@@ -218,7 +217,6 @@ print('\nSaveMe v1.3 by Kasiimh1')
 
 os.chdir(bundle_dir)
 os.chdir(os.getcwd() + '/SupportFiles/')
-#print("Support Files at %s " %(os.getcwd()))
 
 if args.print == True:
     if os.path.isfile(os.path.expanduser(args.path) + '/SaveMe-Tickets/SaveMe-Devices'):
@@ -252,12 +250,10 @@ savePath = savePath + 'SaveMe-Tickets'
 
 if args.extract:
     print("[*] Dumping Ticket from Device!")
-    #os.chdir(os.getcwd() + '/SupportFiles/')
     dumpDeviceTicket(savePath)
 
 if args.add and args.info:
     input('[*] Press ENTER when Device is connected > ')
-    #os.chdir(os.getcwd() + '/SupportFiles/')
     udid = deviceExtractionTool('ideviceinfo.exe', 16, 'UniqueDeviceID: ', False)
     ecid = deviceExtractionTool('ideviceinfo.exe', 13, 'UniqueChipID: ', True)
     platform = deviceExtractionTool('ideviceinfo.exe', 18, 'HardwarePlatform: ', False)
