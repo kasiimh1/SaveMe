@@ -13,31 +13,21 @@ else:
 replace = False
 
 def dumpDeviceTicket(saveTicketPath):
+    input("-- Install openSSH on device and press Enter when ready! --")
     print("[*] Saving to: %s" %saveTicketPath)
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ip = input("Enter Devices IP: ")
     password = getpass.getpass("root@" + ip + "'s password: ")
     ssh.connect(ip, port=22, username='root', password = password)
-    print("Installing Dependancies")
-    os.system("scp img4tool_192_iphoneos-arm.deb root@"+ ip + ":img4tool_192_iphoneos-arm.deb")
-    os.system("scp libssl1.1_1.1.1g_iphoneos-arm.deb root@"+ ip + ":libssl1.1_1.1.1g_iphoneos-arm.deb")
-    os.system("scp libgeneral_31_iphoneos-arm.deb root@"+ ip + ":libgeneral_31_iphoneos-arm.deb")
-    os.system("scp libimg4tool0_192_iphoneos-arm.deb root@"+ ip + ":libimg4tool0_192_iphoneos-arm.deb")
-    os.system("scp libplist3_2.2.0_iphoneos-arm.deb root@"+ ip + ":libplist3_2.2.0_iphoneos-arm.deb")
-    os.system("ssh root@"+ ip + " dpkg -i libplist3_2.2.0_iphoneos-arm.deb")
-    os.system("ssh root@"+ ip + " dpkg -i libssl1.1_1.1.1g_iphoneos-arm.deb")
-    os.system("ssh root@"+ ip + " dpkg -i libgeneral_31_iphoneos-arm.deb")
-    os.system("ssh root@"+ ip + " dpkg -i libimg4tool0_192_iphoneos-arm.deb")
-    os.system("ssh root@"+ ip + " dpkg -i img4tool_192_iphoneos-arm.deb")
     print("Dumping Ticket from iOS FileSystem")
     stdin, stdout, stderr = ssh.exec_command("cat /dev/rdisk1 | dd of=dump.raw bs=256 count=$((0x4000)) &> /dev/null")
-    print("Converting Dump to Ticket")
-    os.system("ssh root@"+ ip + " img4tool --convert -s dumped.shsh dump.raw")
     print("Copying Dump to machine")
-    os.system("scp root@"+ ip + ":dumped.shsh %s/dumped.shsh" %saveTicketPath)
+    os.system("scp root@"+ ip + ":dump.raw %s/dump.raw" %saveTicketPath)
+    print("Converting Dump to Ticket")
+    os.system("img4tool.exe --convert -s dumped.shsh %s/dumped.shsh" %saveTicketPath)
     if args.open:
-            subprocess.run(['explorer', os.path.realpath('%s/dumped.shsh' %saveTicketPath)])
+            subprocess.run(['explorer', os.path.realpath('%s/dump.raw' %saveTicketPath)])
 
 def requestDeviceTicket(d_id, d_ecid, d_boardid, d_ios, d_apnonce, d_save, d_ota):
     process = subprocess.Popen('tsschecker.exe -d %s' %d_id + ' -e %s' %d_ecid + ' --boardconfig %s' %d_boardid + ' --ios %s' %d_ios + ' --apnonce %s' %d_apnonce + ' -s --save-path %s' %d_save + ' %s' %d_ota, shell = True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf8')
@@ -150,7 +140,12 @@ def saveTicketsForCachedDevices(version):
     
 def signedVersionChecker(model):
     ret = None
-    signedReq = requests.get("https://api.ipsw.me/v4/device/" + model + "?type=ipsw")
+    signedReq = "None"
+    if args.ota and str(args.model).find("AppleTV") == 0: 
+        print("-- Requesting currently signed OTA frimwares! -- ")
+        signedReq = requests.get("https://api.ipsw.me/v4/device/" + model + "?type=ota")
+    else:
+        signedReq = requests.get("https://api.ipsw.me/v4/device/" + model + "?type=ipsw")
     print("-- Checking Currently Signed iOS Versions --")
     print("[A] IPSW.me API Response Code: ["+ str(signedReq.status_code) + "]")
     if signedReq.status_code == 200:
@@ -164,7 +159,6 @@ def signedVersionChecker(model):
                     saveTicketsForCachedDevices(api['firmwares'][i]['version'])
                 if args.save == True:
                     ret = api['firmwares'][i]['version']
-
             if api['firmwares'][i]['version'] == args.version and api['firmwares'][i]['signed'] == True:
                 print("[V] iOS", api['firmwares'][i]['version'], "is currently being signed for the:", api['identifier'])
                 break
@@ -193,9 +187,6 @@ def fetchAPNonce(udid):
     os.system('irecovery.exe -n')
     return APNonce
 
-# defaultHashes = '27325c8258be46e69d9ee57fa9a8fbc28b873df434e5e702a8b27999551138ae','3a88b7c3802f2f0510abc432104a15ebd8bd7154',
-# '15400076bc4c35a7c8caefdcae5bda69c140a11bce870548f0862aac28c194cc','603be133ff0bdfa0f83f21e74191cf6770ea43bb'
-
 parser = argparse.ArgumentParser(description='SaveMe: SHSH saver for Windows and macOS by Kasiimh1')
 parser.add_argument('-add', help='Add Device To Cache List (-info needed)', action='store_true')
 parser.add_argument('-check', help='Check Currently Signed iOS Versions (uses iPhone11,2 by default) or use -model to specify model', action='store_true') 
@@ -213,7 +204,7 @@ parser.add_argument('-version', help='Set iOS Version For Saving Tickets')
 parser.add_argument('-extract', help='Dump Ticket from Device', action='store_true')
 
 args = parser.parse_args()
-print('\nSaveMe v1.3 by Kasiimh1')
+print('\nSaveMe v1.4 by Kasiimh1')
 
 os.chdir(bundle_dir)
 os.chdir(os.getcwd() + '/SupportFiles/')
