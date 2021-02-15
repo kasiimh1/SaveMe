@@ -12,17 +12,7 @@ build/SaveMe/base_library.zip
 build/SaveMe/Analysis-00.toc
 __pycache__/SaveMe.cpython-37.pyc
 .DS_Store
-irecovery
-idevice_id
-ideviceenterrecovery
-ideviceinfo
-futurerestore
 *.dll
-windows/SupportFiles/igetnonce.exe
-windows/SupportFiles/ideviceinfo.exe
-windows/SupportFiles/ideviceenterrecovery.exe
-windows/SupportFiles/futurerestore.exe
-windows/SupportFiles/tsschecker.exe
 macOS/build/SaveMe/xref-SaveMe.html
 macOS/build/SaveMe/warn-SaveMe.txt
 macOS/build/SaveMe/PYZ-00.toc
@@ -45,4 +35,3 @@ v1.0/build/SaveMe/warn-SaveMe.txt
 v1.0/build/SaveMe/xref-SaveMe.html
 v1.0/__pycache__/SaveMe.cpython-36.pyc
 *.pyc
-windows/SupportFiles/*
