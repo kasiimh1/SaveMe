@@ -30,10 +30,12 @@ link (https://www.youtube.com/watch?v=RZzXPi1cncE)
 
 - Screenshots
 
+- Compiled win64 bins https://github.com/kasiimh1/libimobiledevice-vs/releases/tag/v0.1
+
 1. (https://github.com/kasiimh1/SaveMe/blob/master/macOS/Screenshots/Screenshot%202020-06-13%20at%2012.20.21.png)
 2. (https://github.com/kasiimh1/SaveMe/blob/master/macOS/Screenshots/Screenshot%202020-06-13%20at%2012.42.03.png)
 3. (https://github.com/kasiimh1/SaveMe/blob/master/macOS/Screenshots/Screenshot%202020-06-13%20at%2012.42.29.png)
 
 Uses the following tools
-- libimobiledevice - ideviceenterrecovery, ideviceinfo, irecovery https://github.com/libimobiledevice
+- libimobiledevice - ideviceenterrecovery, ideviceinfo, irecovery https://github.com/libimobiledevice https://github.com/libimobiledevice-win32/libimobiledevice-vs
 - tsschecker https://github.com/tihmstar/tsschecker (macOS) and https://github.com/DanTheMann15/tsschecker/releases (Windows)
