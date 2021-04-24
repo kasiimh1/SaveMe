@@ -288,7 +288,7 @@ if args.add == True:
         generator = args.generator
 
     APNonce = fetchAPNonce(udid)
-    data = '\n"' + user + '","' + boardid + '","' + product + '","' + generator + '","' + ecid + '","' + udid + '","' + platform + '","' + APNonce + '"'
+    data = '\n"%s","' %user + '%s","' %boardid +'%s","' %product +'%s","' %generator+'%s","' %ecid + '%s","' %udid + '%s","' %platform + '%s"' %APNonce 
     writeDevicesToOutput(data, savePath)
     print('[*] Thanks for using SaveMe v1.0, Exiting Program')
     sys.exit(-1)
